@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tiklina Market Admin Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed-dim": "#00dbee",
+              "on-surface-variant": "#595c5d",
+              "primary": "#176a21",
+              "error-container": "#f95630",
+              "on-tertiary-fixed": "#003d43",
+              "tertiary-fixed": "#10eafe",
+              "tertiary-container": "#10eafe",
+              "primary-container": "#9df197",
+              "primary-dim": "#025d16",
+              "on-primary-fixed": "#00460e",
+              "surface-variant": "#dadddf",
+              "on-error-container": "#520c00",
+              "error": "#b02500",
+              "on-secondary": "#fff0e6",
+              "on-primary": "#d1ffc8",
+              "on-secondary-fixed-variant": "#7b4200",
+              "surface-dim": "#d1d5d7",
+              "on-background": "#2c2f30",
+              "on-tertiary-container": "#005159",
+              "background": "#f5f6f7",
+              "secondary-dim": "#7a4100",
+              "on-tertiary-fixed-variant": "#005c64",
+              "surface-container-high": "#e0e3e4",
+              "tertiary": "#00656f",
+              "on-primary-fixed-variant": "#12661e",
+              "surface-container-highest": "#dadddf",
+              "surface-tint": "#176a21",
+              "inverse-primary": "#9df197",
+              "outline-variant": "#abadae",
+              "error-dim": "#b92902",
+              "on-secondary-fixed": "#522a00",
+              "surface-bright": "#f5f6f7",
+              "on-tertiary": "#d4f9ff",
+              "surface-container-low": "#eff1f2",
+              "on-error": "#ffefec",
+              "on-surface": "#2c2f30",
+              "surface": "#f5f6f7",
+              "secondary-fixed": "#ffc698",
+              "tertiary-dim": "#005861",
+              "primary-fixed-dim": "#90e28a",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-container": "#6e3a00",
+              "on-primary-container": "#005c15",
+              "inverse-on-surface": "#9b9d9e",
+              "outline": "#757778",
+              "secondary-fixed-dim": "#ffb472",
+              "secondary-container": "#ffc698",
+              "inverse-surface": "#0c0f10",
+              "secondary": "#8b4b00",
+              "primary-fixed": "#9df197",
+              "surface-container": "#e6e8ea"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#f5f6f7]/80 backdrop-blur-3xl">
+<div class="flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#176a21] text-2xl" data-icon="eco">eco</span>
+<div class="flex flex-col -space-y-1">
+<span class="text-[#176a21] font-extrabold tracking-tighter text-2xl font-['Manrope']">Tiklina</span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant opacity-70">Central Market Admin</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-6 mr-4">
+<a class="text-[#176a21] font-bold font-['Manrope'] transition-opacity hover:opacity-80" href="#">Home</a>
+<a class="text-[#2c2f30]/60 font-['Manrope'] transition-opacity hover:opacity-80" href="#">Market</a>
+<a class="text-[#2c2f30]/60 font-['Manrope'] transition-opacity hover:opacity-80" href="#">Activity</a>
+<a class="text-[#2c2f30]/60 font-['Manrope'] transition-opacity hover:opacity-80" href="#">Profile</a>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center border-2 border-surface-container-lowest shadow-sm">
+<span class="material-symbols-outlined text-on-primary-container text-xl" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-5xl mx-auto">
+<!-- Greeting Section -->
+<section class="mb-10">
+<h1 class="font-headline font-extrabold text-3xl md:text-4xl text-on-surface tracking-tight mb-2">Good morning, Marcus</h1>
+<p class="text-on-surface-variant text-lg">Managing <span class="text-primary font-semibold">Greenway Central Market</span></p>
+</section>
+<!-- Stats Grid (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<div class="bg-surface-container-lowest p-6 rounded-3xl shadow-[0_8px_24px_rgba(44,47,48,0.04)] border-none">
+<div class="flex items-center justify-between mb-4">
+<span class="text-on-surface-variant font-medium">Monthly Impact</span>
+<span class="material-symbols-outlined text-primary" data-icon="trending_up">trending_up</span>
+</div>
+<div class="text-4xl font-headline font-extrabold text-on-surface mb-1">1,240 <span class="text-sm font-body font-normal text-on-surface-variant">kg</span></div>
+<p class="text-xs text-primary font-bold">Waste diverted from landfills</p>
+</div>
+<div class="bg-tertiary-container/30 backdrop-blur-sm p-6 rounded-3xl shadow-[0_8px_24px_rgba(44,47,48,0.04)] md:col-span-2 border-none">
+<div class="flex items-center justify-between mb-4">
+<span class="text-on-tertiary-container font-medium">Ecosystem Health</span>
+<span class="material-symbols-outlined text-tertiary" data-icon="monitoring">monitoring</span>
+</div>
+<div class="flex items-end gap-6">
+<div class="flex-1">
+<div class="h-2 w-full bg-surface-container-lowest rounded-full mb-3">
+<div class="h-2 bg-tertiary rounded-full" style="width: 82%"></div>
+</div>
+<p class="text-sm text-on-tertiary-container font-medium">82% Collection efficiency this week</p>
+</div>
+<div class="text-2xl font-headline font-extrabold text-tertiary">+12%</div>
+</div>
+</div>
+</div>
+<!-- Active Reports Header -->
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline font-bold text-xl text-on-surface flex items-center gap-2">
+                Active Reports
+                <span class="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full uppercase tracking-tighter">Live</span>
+</h2>
+<button class="text-primary text-sm font-semibold hover:underline">View History</button>
+</div>
+<!-- Reports List -->
+<div class="space-y-4">
+<!-- Report Card 1 -->
+<div class="group bg-surface-container-lowest p-4 rounded-3xl shadow-[0_4px_16px_rgba(44,47,48,0.04)] hover:shadow-[0_8px_24px_rgba(44,47,48,0.08)] transition-all duration-300 flex items-center gap-5">
+<div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
+<img alt="cardboard waste in alleyway" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="close-up of overflowing cardboard recycling bins in a narrow urban alley with soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5M_uY61zQpQAVKy5y4BrtOJdAV3hTjrplfvxpCVoV_lylGT3NgMnsmg-22kypVq02Ud6Tr4c41DdoS749jFVD2zXYgdciXyrp_vu2GyrQYukBUWgtSFtquIUITUXiA3E4csZ6G7gMhJkMEk2vdjxEpZnNeY6PVSJn0_VqoZlNsLEggmAtUm-cfGbdtm5zy7_L3svsMtOg7N0kFlJQ1QpJzI8j0MTJInET7sNLgUEvP6GPbO0A2_OWHRgn-HgvexhGXcALXt5_EA"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-on-surface">West Wing Loading Dock</h3>
+<span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold px-3 py-1 rounded-full uppercase">Pending</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant text-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="calendar_today">calendar_today</span>
+                            Oct 24, 2023
+                        </span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="category">category</span>
+                            Paper / Cardboard
+                        </span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<!-- Report Card 2 -->
+<div class="group bg-surface-container-lowest p-4 rounded-3xl shadow-[0_4px_16px_rgba(44,47,48,0.04)] hover:shadow-[0_8px_24px_rgba(44,47,48,0.08)] transition-all duration-300 flex items-center gap-5">
+<div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
+<img alt="organic waste bin" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="vibrant image of a compost bin filled with colorful fruit peels and vegetable scraps on a clean kitchen surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFbTYxnPsxKMUr-AHMx0V0q2CXjP-yhcluOlDsJL98hR20RCMzFVfwUNUcPSBaWINJZfnp6Im3nZLe2Eq_uvh6Iyr10IGPJ2lsSSxhitjCzptFQnjQqW18p4WCqUNoUiJmJcRnMAonHTWFpzA018bS7EgAFQ1AVSoAXDg_H9xIcVMKxY0L7TBJdyNzYfqiZLC27X6HThUc86Hu7tbIC8d0u5Q83TxLHDyKtTHN_RRgx8pLk4vYjqQAstmlr-lb-Tr9MXuOdfyOqQ"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-on-surface">Food Court B - Entrance</h3>
+<span class="bg-primary-container text-on-primary-container text-[10px] font-bold px-3 py-1 rounded-full uppercase">Collected</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant text-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="calendar_today">calendar_today</span>
+                            Oct 23, 2023
+                        </span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="category">category</span>
+                            Organic
+                        </span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<!-- Report Card 3 -->
+<div class="group bg-surface-container-lowest p-4 rounded-3xl shadow-[0_4px_16px_rgba(44,47,48,0.04)] hover:shadow-[0_8px_24px_rgba(44,47,48,0.08)] transition-all duration-300 flex items-center gap-5 border-l-4 border-error">
+<div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
+<img alt="plastic bottle heap" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="high angle shot of assorted plastic bottles and waste scattered on a gray concrete floor with dramatic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuz8L7JtVgoYXSY2s2zbq2I1-vTE7O8xPhGxYF1qEYIJzbDAp470XJfgSSL03DRU0ntFTYwJaUqIozulaB6ZD09l_Lui7w_AxwIU5N2EtYux5YBUEo89ecTfeNL9bTYrad-pp5D5YMYkzuCh2hOHDSdUucwpBIOcPoJkAZc0W8gtzAVuIgKsihaX5qhdW8deLTkmEt8X7K6ldvPVxemJtcYWDT87WiKVxbUvl6wSvgH2SBOC3HRqumA5eRsE_WbKHQdcJQcgdxHw"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-on-surface">Main Parking Gate 3</h3>
+<span class="bg-error-container text-on-error-container text-[10px] font-bold px-3 py-1 rounded-full uppercase">Urgent</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant text-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="calendar_today">calendar_today</span>
+                            Oct 23, 2023
+                        </span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="category">category</span>
+                            Plastic
+                        </span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Prominent FAB -->
+<button class="fixed bottom-28 right-6 z-40 bg-gradient-to-br from-primary to-primary-dim text-on-primary flex items-center gap-3 px-8 py-5 rounded-3xl shadow-[0_12px_32px_rgba(23,106,33,0.3)] active:scale-95 transition-all duration-200 group">
+<span class="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform" data-icon="photo_camera" style="font-variation-settings: 'FILL' 1;">photo_camera</span>
+<span class="font-headline font-extrabold text-lg tracking-tight">Report Waste</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full h-20 bg-white/80 backdrop-blur-3xl flex justify-around items-center px-4 pb-safe z-50 border-t border-[#2c2f30]/10 shadow-[0_-8px_24px_rgba(44,47,48,0.06)] rounded-t-[2rem]">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center bg-[#176a21]/10 text-[#176a21] rounded-2xl px-5 py-1.5 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="font-['Inter'] font-medium text-[11px] mt-0.5">Home</span>
+</a>
+<!-- Market -->
+<a class="flex flex-col items-center justify-center text-[#2c2f30]/60 px-5 py-1.5 hover:bg-[#f5f6f7] transition-colors rounded-2xl" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-['Inter'] font-medium text-[11px] mt-0.5">Market</span>
+</a>
+<!-- Activity -->
+<a class="flex flex-col items-center justify-center text-[#2c2f30]/60 px-5 py-1.5 hover:bg-[#f5f6f7] transition-colors rounded-2xl" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-['Inter'] font-medium text-[11px] mt-0.5">Activity</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-[#2c2f30]/60 px-5 py-1.5 hover:bg-[#f5f6f7] transition-colors rounded-2xl" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Inter'] font-medium text-[11px] mt-0.5">Profile</span>
+</a>
+</nav>
+</body></html>

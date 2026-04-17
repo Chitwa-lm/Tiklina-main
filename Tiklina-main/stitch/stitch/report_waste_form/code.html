@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Report Waste - Tiklina</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed-dim": "#00dbee",
+                        "on-surface-variant": "#595c5d",
+                        "primary": "#176a21",
+                        "error-container": "#f95630",
+                        "on-tertiary-fixed": "#003d43",
+                        "tertiary-fixed": "#10eafe",
+                        "tertiary-container": "#10eafe",
+                        "primary-container": "#9df197",
+                        "primary-dim": "#025d16",
+                        "on-primary-fixed": "#00460e",
+                        "surface-variant": "#dadddf",
+                        "on-error-container": "#520c00",
+                        "error": "#b02500",
+                        "on-secondary": "#fff0e6",
+                        "on-primary": "#d1ffc8",
+                        "on-secondary-fixed-variant": "#7b4200",
+                        "surface-dim": "#d1d5d7",
+                        "on-background": "#2c2f30",
+                        "on-tertiary-container": "#005159",
+                        "background": "#f5f6f7",
+                        "secondary-dim": "#7a4100",
+                        "on-tertiary-fixed-variant": "#005c64",
+                        "surface-container-high": "#e0e3e4",
+                        "tertiary": "#00656f",
+                        "on-primary-fixed-variant": "#12661e",
+                        "surface-container-highest": "#dadddf",
+                        "surface-tint": "#176a21",
+                        "inverse-primary": "#9df197",
+                        "outline-variant": "#abadae",
+                        "error-dim": "#b92902",
+                        "on-secondary-fixed": "#522a00",
+                        "surface-bright": "#f5f6f7",
+                        "on-tertiary": "#d4f9ff",
+                        "surface-container-low": "#eff1f2",
+                        "on-error": "#ffefec",
+                        "on-surface": "#2c2f30",
+                        "surface": "#f5f6f7",
+                        "secondary-fixed": "#ffc698",
+                        "tertiary-dim": "#005861",
+                        "primary-fixed-dim": "#90e28a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#6e3a00",
+                        "on-primary-container": "#005c15",
+                        "inverse-on-surface": "#9b9d9e",
+                        "outline": "#757778",
+                        "secondary-fixed-dim": "#ffb472",
+                        "secondary-container": "#ffc698",
+                        "inverse-surface": "#0c0f10",
+                        "secondary": "#8b4b00",
+                        "primary-fixed": "#9df197",
+                        "surface-container": "#e6e8ea"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        .glass-nav {
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f6f7;
+            color: #2c2f30;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar Execution -->
+<header class="fixed top-0 w-full z-50 bg-[#f5f6f7]/80 backdrop-blur-3xl">
+<div class="flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<button class="p-2 -ml-2 hover:bg-surface-container-low rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold text-lg tracking-tight text-on-surface">Report Waste</h1>
+</div>
+<div class="text-primary font-extrabold tracking-tighter text-2xl">
+                Tiklina
+            </div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto space-y-8">
+<!-- Step 1: Photo Capture -->
+<section class="space-y-3">
+<h2 class="font-headline font-bold text-on-surface-variant text-sm px-1 uppercase tracking-widest">Evidence</h2>
+<button class="w-full aspect-video rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-lowest flex flex-col items-center justify-center gap-3 hover:bg-surface-container-low transition-all group active:scale-[0.98]">
+<div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'wght' 600;">photo_camera</span>
+</div>
+<span class="font-headline font-bold text-on-surface">Tap to take a photo</span>
+<span class="text-xs text-on-surface-variant font-medium">JPEG or PNG up to 10MB</span>
+</button>
+</section>
+<!-- Step 2: Location -->
+<section class="space-y-3">
+<div class="flex items-center justify-between px-1">
+<h2 class="font-headline font-bold text-on-surface-variant text-sm uppercase tracking-widest">Incident Location</h2>
+<div class="flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[18px] fill-icon" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-xs font-bold font-headline">GPS Location Acquired</span>
+</div>
+</div>
+<div class="relative w-full h-40 rounded-2xl overflow-hidden bg-surface-container-low shadow-sm">
+<img class="w-full h-full object-cover" data-alt="stylized minimalist map view of an urban residential area with a green location pin dropped on a street corner" data-location="London" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAO1Oy188Tc6WPSXbcjYWg4Z7UCQOe0sXcCKe0Z0Ok6YvOSM1h4ZvWbO60zRxlfJmTubB9wBAuDUxG93LIrDDmWU-H25RM5j3_cdG1la0fOpOuF32EpcrCQ9GXqQJwgUdBePrvjhesQxRZSFOzgRJwP9MgzV9rDntao60zmAhOiMVVknWIPXEbrktVZsRTofa-gb_SLRzTriDU1gxRyUPxteOsxVpTK6A1-4uM0UyAfnM6f30tV35GsVO8Jrx_Ewpej_23kvrqQxw"/>
+<div class="absolute inset-0 bg-black/5 pointer-events-none"></div>
+<div class="absolute bottom-3 left-3 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-2 rounded-xl border border-white/20 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">location_on</span>
+<span class="text-xs font-semibold text-on-surface">Near High Street, SW1</span>
+</div>
+</div>
+</section>
+<!-- Step 3: Details -->
+<section class="space-y-6">
+<div class="space-y-3">
+<label class="font-headline font-bold text-on-surface-variant text-sm px-1 uppercase tracking-widest block" for="description">Waste Description</label>
+<div class="relative">
+<textarea class="w-full bg-surface-container-lowest border-0 rounded-2xl px-5 py-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary shadow-sm" id="description" placeholder="Describe what you see (e.g. household items, garden waste, chemicals)..." rows="3"></textarea>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between px-1">
+<label class="font-headline font-bold text-on-surface-variant text-sm uppercase tracking-widest">Estimated Volume</label>
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-xs font-bold font-headline">1 Truck Load</span>
+</div>
+<div class="relative px-2 py-4 bg-surface-container-low rounded-2xl">
+<input class="w-full h-2 bg-surface-variant rounded-full appearance-none cursor-pointer accent-primary" max="5" min="1" type="range" value="3"/>
+<div class="flex justify-between mt-2 px-1 text-[10px] font-bold text-on-surface-variant uppercase tracking-tighter">
+<span>Small Bag</span>
+<span>Car Trunk</span>
+<span>Pickup</span>
+<span>Truck Load</span>
+<span>Multiple</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Environmental Impact Teaser (Context Specific Component) -->
+<div class="bg-tertiary-container/30 border border-tertiary-container/50 rounded-2xl p-5 flex items-start gap-4">
+<div class="w-10 h-10 rounded-xl bg-tertiary-container flex items-center justify-center text-on-tertiary-container shrink-0">
+<span class="material-symbols-outlined">eco</span>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-tertiary-container text-sm">Impact Tracker</h3>
+<p class="text-xs text-on-tertiary-container/80 mt-1 leading-relaxed">Reporting this helps us prevent soil contamination and recover up to 40% of materials for local recycling.</p>
+</div>
+</div>
+</main>
+<!-- Submission Footer -->
+<div class="fixed bottom-0 left-0 w-full p-6 bg-surface/80 backdrop-blur-xl z-40">
+<button class="w-full bg-gradient-to-br from-primary to-primary-dim text-on-primary font-headline font-extrabold py-5 rounded-2xl shadow-[0_8px_24px_rgba(23,106,33,0.25)] hover:shadow-lg active:scale-[0.97] transition-all flex items-center justify-center gap-3">
+<span>Submit Report to Council</span>
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+</div>
+</body></html>

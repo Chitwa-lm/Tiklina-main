@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed-dim": "#00dbee",
+              "on-surface-variant": "#595c5d",
+              "primary": "#176a21",
+              "error-container": "#f95630",
+              "on-tertiary-fixed": "#003d43",
+              "tertiary-fixed": "#10eafe",
+              "tertiary-container": "#10eafe",
+              "primary-container": "#9df197",
+              "primary-dim": "#025d16",
+              "on-primary-fixed": "#00460e",
+              "surface-variant": "#dadddf",
+              "on-error-container": "#520c00",
+              "error": "#b02500",
+              "on-secondary": "#fff0e6",
+              "on-primary": "#d1ffc8",
+              "on-secondary-fixed-variant": "#7b4200",
+              "surface-dim": "#d1d5d7",
+              "on-background": "#2c2f30",
+              "on-tertiary-container": "#005159",
+              "background": "#f5f6f7",
+              "secondary-dim": "#7a4100",
+              "on-tertiary-fixed-variant": "#005c64",
+              "surface-container-high": "#e0e3e4",
+              "tertiary": "#00656f",
+              "on-primary-fixed-variant": "#12661e",
+              "surface-container-highest": "#dadddf",
+              "surface-tint": "#176a21",
+              "inverse-primary": "#9df197",
+              "outline-variant": "#abadae",
+              "error-dim": "#b92902",
+              "on-secondary-fixed": "#522a00",
+              "surface-bright": "#f5f6f7",
+              "on-tertiary": "#d4f9ff",
+              "surface-container-low": "#eff1f2",
+              "on-error": "#ffefec",
+              "on-surface": "#2c2f30",
+              "surface": "#f5f6f7",
+              "secondary-fixed": "#ffc698",
+              "tertiary-dim": "#005861",
+              "primary-fixed-dim": "#90e28a",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-container": "#6e3a00",
+              "on-primary-container": "#005c15",
+              "inverse-on-surface": "#9b9d9e",
+              "outline": "#757778",
+              "secondary-fixed-dim": "#ffb472",
+              "secondary-container": "#ffc698",
+              "inverse-surface": "#0c0f10",
+              "secondary": "#8b4b00",
+              "primary-fixed": "#9df197",
+              "surface-container": "#e6e8ea"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f6f7;
+            color: #2c2f30;
+        }
+        h1, h2, h3 {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-12">
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#f5f6f7]/80 backdrop-blur-3xl flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold text-lg tracking-tight text-on-surface">Verify Job</h1>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">eco</span>
+<span class="font-headline font-extrabold tracking-tighter text-2xl text-primary">Tiklina</span>
+</div>
+</nav>
+<main class="mt-20 px-6 max-w-2xl mx-auto space-y-8">
+<!-- Job Status Badge -->
+<div class="flex justify-center">
+<div class="bg-primary-container/30 text-on-primary-container px-4 py-1.5 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label text-xs font-bold uppercase tracking-wider">Collection Completed</span>
+</div>
+</div>
+<!-- Before & After Comparison -->
+<section class="space-y-4">
+<div class="grid grid-cols-2 gap-4">
+<!-- Before Card -->
+<div class="space-y-2">
+<div class="relative aspect-[4/5] rounded-xl overflow-hidden shadow-sm bg-surface-container-low">
+<img alt="Before collection" class="w-full h-full object-cover grayscale-[30%]" data-alt="A messy pile of household waste and recycling bags sitting on a suburban driveway before being collected by sanitation workers." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXxxGU7_7gZednuqfssbgTgIzBO2OBUfMUwQPovVtDahPBfN_lOa1q6OjS1k7qC0OATBYQhwWf4DbR0JiaoTF3BLwbhLeqNRZADK3R-cHieLLdrwaAV02UHP5E380iM0mm1IT8nFobbpGfTcckLprMUldbPqmuxyXI9Y_eRP-hJCfnjXrfEbsA8yY-qpC5BbBWJ--R48RSjt-ZPANy7cn22QCa0cbxhcoDUL6q3TxRn0HVZhrWsNo09LfoVQaMx-fPgToP8UINsg"/>
+<div class="absolute top-3 left-3 bg-black/40 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Before</div>
+</div>
+</div>
+<!-- After Card -->
+<div class="space-y-2">
+<div class="relative aspect-[4/5] rounded-xl overflow-hidden shadow-sm ring-4 ring-primary-container/40">
+<img alt="After collection" class="w-full h-full object-cover" data-alt="A perfectly clean and empty concrete driveway where a waste pile previously sat, bright morning sunlight and sharp shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtWgwKo3nTNgktA-gKdyvaOH2hPUYQlaC76Qf-zrgDulslYoguLK2MDDVgY94eOiDscJeCNmLgJyNSHZAapdqEqw6kJCel-E04PgP1oRUzvQhWV1fp429w-1fTS1xaRYlZaReCjnuShaFtuHMhpDWVhgQE7sjGjRpQcih3n0rE76-8mSha19MKYXsVdDgJsQBsL-2nbe2Z8DKmiThpy752-4HzEueOIJsOQn6u6OyqF5ya-r5VnL4RGgStS0bYVlaJBTFL-8hRVw"/>
+<div class="absolute top-3 left-3 bg-primary/80 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">After</div>
+</div>
+</div>
+</div>
+<p class="text-center text-on-surface-variant text-sm font-body px-4">
+                Job ID: #TK-8829 • Collected by <span class="font-bold text-on-surface">Alex Green</span>
+</p>
+</section>
+<!-- Rating Section -->
+<section class="bg-surface-container-lowest rounded-xl p-8 text-center space-y-6 shadow-[0_8px_24px_rgba(44,47,48,0.04)]">
+<h2 class="text-2xl font-headline font-extrabold text-on-surface tracking-tight">Rate the Collection</h2>
+<div class="flex justify-center gap-2">
+<button class="group">
+<span class="material-symbols-outlined text-4xl text-secondary group-hover:scale-110 transition-transform" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="group">
+<span class="material-symbols-outlined text-4xl text-secondary group-hover:scale-110 transition-transform" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="group">
+<span class="material-symbols-outlined text-4xl text-secondary group-hover:scale-110 transition-transform" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="group">
+<span class="material-symbols-outlined text-4xl text-secondary group-hover:scale-110 transition-transform" style="font-variation-settings: 'FILL' 1;">star</span>
+</button>
+<button class="group">
+<span class="material-symbols-outlined text-4xl text-secondary/30 group-hover:scale-110 transition-transform">star</span>
+</button>
+</div>
+<div class="space-y-3 pt-2">
+<label class="block text-left text-sm font-semibold text-on-surface-variant ml-1" for="comments">Optional Comments</label>
+<textarea class="w-full bg-surface-container-low border-none rounded-xl p-4 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 transition-all resize-none" id="comments" placeholder="Tell us about the service..." rows="3"></textarea>
+</div>
+</section>
+<!-- Environmental Impact Quick Stat -->
+<div class="bg-tertiary-container/10 border border-tertiary-container/20 rounded-xl p-5 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-tertiary-container">compost</span>
+</div>
+<div class="flex-1">
+<p class="text-xs font-bold text-on-tertiary-container uppercase tracking-wider">Impact Created</p>
+<p class="text-on-surface font-body text-sm">This collection diverted <span class="font-bold">12.4kg</span> of waste from local landfills.</p>
+</div>
+</div>
+<!-- Action Button -->
+<div class="pt-4 space-y-4">
+<button class="w-full h-14 rounded-xl bg-gradient-to-br from-primary to-primary-dim text-on-primary font-headline font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+                Submit Verification
+                <span class="material-symbols-outlined">send</span>
+</button>
+<button class="w-full py-3 text-primary font-body font-semibold text-sm hover:underline">
+                Report an Issue
+            </button>
+</div>
+</main>
+<!-- Success Indicator Floating Tip -->
+<div class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-md pointer-events-none">
+<div class="bg-on-surface text-white px-6 py-4 rounded-full flex items-center justify-between shadow-2xl opacity-90 backdrop-blur-sm">
+<div class="flex items-center gap-3">
+<div class="bg-primary p-1 rounded-full">
+<span class="material-symbols-outlined text-sm">eco</span>
+</div>
+<p class="text-[13px] font-medium">+15 Green Points for verifying</p>
+</div>
+<span class="material-symbols-outlined text-sm cursor-pointer pointer-events-auto">close</span>
+</div>
+</div>
+</body></html>

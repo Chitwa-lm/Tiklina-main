@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tiklina - Eco-Friendly Waste Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "tertiary-fixed-dim": "#00dbee",
+                "on-surface-variant": "#595c5d",
+                "primary": "#176a21",
+                "error-container": "#f95630",
+                "on-tertiary-fixed": "#003d43",
+                "tertiary-fixed": "#10eafe",
+                "tertiary-container": "#10eafe",
+                "primary-container": "#9df197",
+                "primary-dim": "#025d16",
+                "on-primary-fixed": "#00460e",
+                "surface-variant": "#dadddf",
+                "on-error-container": "#520c00",
+                "error": "#b02500",
+                "on-secondary": "#fff0e6",
+                "on-primary": "#d1ffc8",
+                "on-secondary-fixed-variant": "#7b4200",
+                "surface-dim": "#d1d5d7",
+                "on-background": "#2c2f30",
+                "on-tertiary-container": "#005159",
+                "background": "#f5f6f7",
+                "secondary-dim": "#7a4100",
+                "on-tertiary-fixed-variant": "#005c64",
+                "surface-container-high": "#e0e3e4",
+                "tertiary": "#00656f",
+                "on-primary-fixed-variant": "#12661e",
+                "surface-container-highest": "#dadddf",
+                "surface-tint": "#176a21",
+                "inverse-primary": "#9df197",
+                "outline-variant": "#abadae",
+                "error-dim": "#b92902",
+                "on-secondary-fixed": "#522a00",
+                "surface-bright": "#f5f6f7",
+                "on-tertiary": "#d4f9ff",
+                "surface-container-low": "#eff1f2",
+                "on-error": "#ffefec",
+                "on-surface": "#2c2f30",
+                "surface": "#f5f6f7",
+                "secondary-fixed": "#ffc698",
+                "tertiary-dim": "#005861",
+                "primary-fixed-dim": "#90e28a",
+                "surface-container-lowest": "#ffffff",
+                "on-secondary-container": "#6e3a00",
+                "on-primary-container": "#005c15",
+                "inverse-on-surface": "#9b9d9e",
+                "outline": "#757778",
+                "secondary-fixed-dim": "#ffb472",
+                "secondary-container": "#ffc698",
+                "inverse-surface": "#0c0f10",
+                "secondary": "#8b4b00",
+                "primary-fixed": "#9df197",
+                "surface-container": "#e6e8ea"
+              },
+              fontFamily: {
+                "headline": ["Manrope"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        .bg-mesh {
+            background-color: #f5f6f7;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(23, 106, 33, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(23, 106, 33, 0.05) 0px, transparent 50%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body bg-mesh text-on-surface min-h-screen flex flex-col selection:bg-primary-container">
+<!-- Splash Content Wrapper -->
+<main class="flex-1 flex flex-col px-8 py-12 max-w-md mx-auto w-full">
+<!-- Top Branding Section -->
+<section class="flex flex-col items-center text-center mt-12 mb-16 space-y-4">
+<div class="w-20 h-20 bg-primary-container rounded-3xl flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-on-primary-container text-5xl" data-icon="eco">eco</span>
+</div>
+<div class="space-y-1">
+<h1 class="font-headline font-extrabold text-4xl tracking-tighter text-primary">Tiklina</h1>
+<p class="text-on-surface-variant font-medium text-sm tracking-wide">THE DIGITAL STEWARD</p>
+</div>
+</section>
+<!-- Welcome Message -->
+<section class="mb-12 space-y-3">
+<h2 class="font-headline font-bold text-3xl text-on-surface leading-tight">Welcome to the ecosystem.</h2>
+<p class="text-on-surface-variant text-lg leading-relaxed">Choose your role to start managing waste more efficiently today.</p>
+</section>
+<!-- Role Selection Buttons (Bento-style Stack) -->
+<section class="flex-1 flex flex-col gap-6">
+<!-- Market Admin Role -->
+<button class="group relative w-full text-left focus:outline-none transition-transform active:scale-95 duration-200">
+<div class="glass-card p-6 rounded-3xl border border-outline-variant/10 shadow-[0_8px_24px_rgba(44,47,48,0.04)] flex items-center gap-5 overflow-hidden">
+<!-- Accent Decoration -->
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
+<div class="w-16 h-16 rounded-2xl bg-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-secondary-container text-3xl" data-icon="storefront">storefront</span>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-bold text-xl text-on-surface">I am a Market Admin</h3>
+<p class="text-on-surface-variant text-sm mt-0.5">Manage stalls and waste collection schedules.</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</button>
+<!-- Waste Collector Role -->
+<button class="group relative w-full text-left focus:outline-none transition-transform active:scale-95 duration-200">
+<div class="glass-card p-6 rounded-3xl border border-outline-variant/10 shadow-[0_8px_24px_rgba(44,47,48,0.04)] flex items-center gap-5 overflow-hidden">
+<!-- Accent Decoration -->
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
+<div class="w-16 h-16 rounded-2xl bg-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-primary-container text-3xl" data-icon="local_shipping">local_shipping</span>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-bold text-xl text-on-surface">I am a Waste Collector</h3>
+<p class="text-on-surface-variant text-sm mt-0.5">Find nearby pickups and optimize your routes.</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</button>
+</section>
+<!-- Visual Anchor (Bottom Illustration/Image) -->
+<footer class="mt-auto pt-12 text-center opacity-60">
+<div class="inline-flex items-center gap-2 px-4 py-2 bg-surface-container-low rounded-full">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant">Connecting for a greener future</span>
+</div>
+<!-- Contextual Background Image Element -->
+<div class="mt-8 rounded-2xl overflow-hidden h-32 relative grayscale mix-blend-multiply opacity-20">
+<img alt="" class="w-full h-full object-cover" data-alt="abstract close-up of fresh green leaves with morning dew and soft natural sunlight filtering through" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7j0NyFRE-hM2KmzjNsJTJqmRJ_ZHnDMVdI1i7_MjcdbJ9l1putIVarK6vJ0QBdgyLPK01sz4zga0x-mJ641kveUh3-yoptM0WMaiNtsCtmI4LnIxRIgTUPrNyc7cQf0n7mRX3HIvQME45jF8-930eLTi8iRBnICMiYgOBJfALY8r8z5P2WY4TZYavs2Rm1ounzAMKf5Ip_Wox0xH4gFcgUC-JpJ7_W0ooZh6PCzxok4SFyd_Rj5Tckzr9jVdn7AbTRKP5GemOGw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-[#f5f6f7] via-transparent to-transparent"></div>
+</div>
+</footer>
+</main>
+<!-- Suppressed Shell Components (As per instructions for transactional/onboarding screens) -->
+<!-- Navigation bars and FABs are intentionally omitted to focus on user journey choice -->
+</body></html>

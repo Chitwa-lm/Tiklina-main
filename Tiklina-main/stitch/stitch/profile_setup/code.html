@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tiklina - Profile Setup</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed-dim": "#00dbee",
+              "on-surface-variant": "#595c5d",
+              "primary": "#176a21",
+              "error-container": "#f95630",
+              "on-tertiary-fixed": "#003d43",
+              "tertiary-fixed": "#10eafe",
+              "tertiary-container": "#10eafe",
+              "primary-container": "#9df197",
+              "primary-dim": "#025d16",
+              "on-primary-fixed": "#00460e",
+              "surface-variant": "#dadddf",
+              "on-error-container": "#520c00",
+              "error": "#b02500",
+              "on-secondary": "#fff0e6",
+              "on-primary": "#d1ffc8",
+              "on-secondary-fixed-variant": "#7b4200",
+              "surface-dim": "#d1d5d7",
+              "on-background": "#2c2f30",
+              "on-tertiary-container": "#005159",
+              "background": "#f5f6f7",
+              "secondary-dim": "#7a4100",
+              "on-tertiary-fixed-variant": "#005c64",
+              "surface-container-high": "#e0e3e4",
+              "tertiary": "#00656f",
+              "on-primary-fixed-variant": "#12661e",
+              "surface-container-highest": "#dadddf",
+              "surface-tint": "#176a21",
+              "inverse-primary": "#9df197",
+              "outline-variant": "#abadae",
+              "error-dim": "#b92902",
+              "on-secondary-fixed": "#522a00",
+              "surface-bright": "#f5f6f7",
+              "on-tertiary": "#d4f9ff",
+              "surface-container-low": "#eff1f2",
+              "on-error": "#ffefec",
+              "on-surface": "#2c2f30",
+              "surface": "#f5f6f7",
+              "secondary-fixed": "#ffc698",
+              "tertiary-dim": "#005861",
+              "primary-fixed-dim": "#90e28a",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-container": "#6e3a00",
+              "on-primary-container": "#005c15",
+              "inverse-on-surface": "#9b9d9e",
+              "outline": "#757778",
+              "secondary-fixed-dim": "#ffb472",
+              "secondary-container": "#ffc698",
+              "inverse-surface": "#0c0f10",
+              "secondary": "#8b4b00",
+              "primary-fixed": "#9df197",
+              "surface-container": "#e6e8ea"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar Fragment -->
+<header class="fixed top-0 w-full z-50 bg-[#f5f6f7]/80 backdrop-blur-3xl">
+<div class="flex items-center justify-between px-6 h-16 w-full max-w-2xl mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#176a21]" data-icon="eco">eco</span>
+<h1 class="font-['Manrope'] font-bold text-lg tracking-tight text-[#176a21]">Profile Setup</h1>
+</div>
+<button class="p-2 text-on-surface-variant hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto min-h-screen">
+<!-- Welcoming Header -->
+<section class="mb-10">
+<h2 class="font-headline font-extrabold text-4xl text-on-surface tracking-tight leading-tight mb-4">
+                Complete your profile
+            </h2>
+<p class="text-on-surface-variant text-lg leading-relaxed max-w-md">
+                Help us tailor the experience for your specific needs and service area.
+            </p>
+</section>
+<!-- Profile Form Section -->
+<div class="space-y-8">
+<!-- Bento Layout for Form Context -->
+<div class="grid grid-cols-1 md:grid-cols-1 gap-6">
+<!-- Name Field -->
+<div class="space-y-3">
+<label class="block font-headline font-bold text-sm uppercase tracking-widest text-on-surface-variant ml-1">
+                        Identity
+                    </label>
+<div class="relative group">
+<input class="w-full h-16 px-6 bg-surface-container-lowest border-2 border-transparent focus:border-primary focus:ring-0 rounded-xl font-medium text-on-surface placeholder:text-outline-variant transition-all duration-300" placeholder="Name (Market or Company)" type="text"/>
+</div>
+</div>
+<!-- Location Field -->
+<div class="space-y-3">
+<label class="block font-headline font-bold text-sm uppercase tracking-widest text-on-surface-variant ml-1">
+                        Service Reach
+                    </label>
+<div class="flex gap-3">
+<div class="relative flex-grow">
+<input class="w-full h-16 px-6 bg-surface-container-lowest border-2 border-transparent focus:border-primary focus:ring-0 rounded-xl font-medium text-on-surface placeholder:text-outline-variant transition-all duration-300" placeholder="Location / Service Area" type="text"/>
+</div>
+<button class="w-16 h-16 flex items-center justify-center bg-primary-container text-on-primary-container rounded-xl hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="my_location">my_location</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Map Integration Snippet -->
+<div class="relative overflow-hidden rounded-xl h-64 shadow-[0_8px_24px_rgba(44,47,48,0.06)] bg-surface-container-low group">
+<img class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" data-alt="Modern clean digital map interface showing a green urban district with soft minimalist markers and professional topography" data-location="Berlin" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArEV0gcmMU7hZmo7tvL4MAGImtA-u_CTUqbzbPn0oKM_NX5Dbu2PcZEz3oLSL5aLic3AVp0XVuY_GcMIJm7NqSYZCBi8pCNb47oyXzlBaEcc18Wzu3qWArrMC7NGWsY13oH9Lt6VFcKOu8hEzRGmFdA8KOpWt_wNi441mOp1x087OPEK1FsDCkYUPf2U_JfxzA5L2Q1316g5-xRrbGTpvGm-BgUJbYNoquVUkb3RnlXaWjkn6PLXj56fOuAGGu8Kw4gok5xDHhVg"/>
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="w-12 h-12 bg-primary flex items-center justify-center rounded-full text-white shadow-xl ring-4 ring-white/20">
+<span class="material-symbols-outlined" data-icon="location_on" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+</div>
+<div class="absolute bottom-4 right-4 bg-surface-container-lowest/90 backdrop-blur-md px-4 py-2 rounded-full border border-outline-variant/15 flex items-center gap-2">
+<span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+<span class="text-xs font-headline font-bold text-on-surface">Live Coverage Area</span>
+</div>
+</div>
+<!-- Accessibility Note -->
+<p class="text-on-surface-variant text-sm text-center italic mt-6">
+                Your data is stored securely and used only for waste collection logistics.
+            </p>
+</div>
+</main>
+<!-- Sticky Bottom Button Wrapper -->
+<div class="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-surface via-surface to-transparent z-40">
+<div class="max-w-2xl mx-auto">
+<button class="w-full h-16 bg-gradient-to-br from-primary to-primary-dim text-on-primary font-headline font-bold text-lg rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all duration-300 flex items-center justify-center gap-3">
+                Save and Continue
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</body></html>

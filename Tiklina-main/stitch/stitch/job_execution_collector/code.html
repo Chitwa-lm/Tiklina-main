@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Job Execution | Tiklina</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed-dim": "#00dbee",
+              "on-surface-variant": "#595c5d",
+              "primary": "#176a21",
+              "error-container": "#f95630",
+              "on-tertiary-fixed": "#003d43",
+              "tertiary-fixed": "#10eafe",
+              "tertiary-container": "#10eafe",
+              "primary-container": "#9df197",
+              "primary-dim": "#025d16",
+              "on-primary-fixed": "#00460e",
+              "surface-variant": "#dadddf",
+              "on-error-container": "#520c00",
+              "error": "#b02500",
+              "on-secondary": "#fff0e6",
+              "on-primary": "#d1ffc8",
+              "on-secondary-fixed-variant": "#7b4200",
+              "surface-dim": "#d1d5d7",
+              "on-background": "#2c2f30",
+              "on-tertiary-container": "#005159",
+              "background": "#f5f6f7",
+              "secondary-dim": "#7a4100",
+              "on-tertiary-fixed-variant": "#005c64",
+              "surface-container-high": "#e0e3e4",
+              "tertiary": "#00656f",
+              "on-primary-fixed-variant": "#12661e",
+              "surface-container-highest": "#dadddf",
+              "surface-tint": "#176a21",
+              "inverse-primary": "#9df197",
+              "outline-variant": "#abadae",
+              "error-dim": "#b92902",
+              "on-secondary-fixed": "#522a00",
+              "surface-bright": "#f5f6f7",
+              "on-tertiary": "#d4f9ff",
+              "surface-container-low": "#eff1f2",
+              "on-error": "#ffefec",
+              "on-surface": "#2c2f30",
+              "surface": "#f5f6f7",
+              "secondary-fixed": "#ffc698",
+              "tertiary-dim": "#005861",
+              "primary-fixed-dim": "#90e28a",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-container": "#6e3a00",
+              "on-primary-container": "#005c15",
+              "inverse-on-surface": "#9b9d9e",
+              "outline": "#757778",
+              "secondary-fixed-dim": "#ffb472",
+              "secondary-container": "#ffc698",
+              "inverse-surface": "#0c0f10",
+              "secondary": "#8b4b00",
+              "primary-fixed": "#9df197",
+              "surface-container": "#e6e8ea"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1;
+        }
+        .bg-glass {
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#f5f6f7]/80 dark:bg-slate-900/80 backdrop-blur-3xl flex items-center justify-between px-6 h-16 w-full shadow-none">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#176a21] dark:text-[#4ade80] text-2xl" data-icon="arrow_back">arrow_back</span>
+<h1 class="font-['Manrope'] font-bold text-lg tracking-tight text-[#176a21] dark:text-[#4ade80]">Job Execution</h1>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#176a21] dark:text-[#4ade80] text-2xl" data-icon="more_vert">more_vert</span>
+</div>
+</header>
+<main class="flex-grow pt-20 pb-28 px-4 max-w-xl mx-auto w-full">
+<!-- Job Details Card -->
+<section class="bg-surface-container-lowest rounded-3xl p-6 shadow-sm mb-6">
+<div class="flex flex-col gap-1 mb-4">
+<span class="text-xs font-bold text-primary tracking-widest uppercase font-headline">Destination</span>
+<h2 class="text-2xl font-extrabold font-headline leading-tight">Green Valley Marketplace</h2>
+<p class="text-on-surface-variant text-base flex items-start gap-2 mt-1">
+<span class="material-symbols-outlined mt-0.5" data-icon="location_on">location_on</span>
+                    142 Industrial Way, West Sector, Block C
+                </p>
+</div>
+<div class="h-40 w-full rounded-2xl overflow-hidden mb-6 relative group">
+<img alt="Map view" class="w-full h-full object-cover grayscale brightness-90 contrast-125" data-alt="high-contrast satellite map view of industrial commercial district with roads and greenery minimalist cartography style" data-location="Green Valley" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEorpH9ZdUGNbdB70r2-W8v1Bb6mfsl0zsYeO8DFMzg5c2NNfoFl6_j_VZt-R5O3pQxrMt5xRIfFa-We8NJ2nOOz2RJC0HxmIlpChqOOQ84uZ6Mjs81ZOxeqNY1aZN01EgnLwJ_1aARl4ibRurAImgKyDBrYVaQ9lM_5I0DyKZrPAZofjY-vF4WWIZYzPQoYSa2TL6Z8QLffD4uQo4AQoA-6vume8_c8i5gP8MRgQNPDD8ZLYI_KnMV3wGv7_lYKaj2PbeG6iRGg"/>
+<div class="absolute inset-0 bg-primary/10 pointer-events-none"></div>
+<div class="absolute bottom-4 right-4 bg-surface-container-lowest p-2 rounded-xl shadow-lg flex items-center gap-2">
+<span class="text-xs font-bold text-primary">Live Traffic</span>
+<div class="w-2 h-2 rounded-full bg-[#4ade80] animate-pulse"></div>
+</div>
+</div>
+<button class="w-full bg-gradient-to-br from-primary to-primary-dim text-on-primary py-4 rounded-3xl font-headline font-bold text-lg flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined" data-icon="map" style="font-variation-settings: 'FILL' 1;">map</span>
+                Navigate to Site
+            </button>
+</section>
+<!-- Current Status -->
+<section class="bg-surface-container-low rounded-3xl p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline font-bold text-lg">Current Status</h3>
+<span class="bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full text-sm font-bold border border-secondary/20">In Progress</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-4 bg-surface-container-lowest p-4 rounded-2xl">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+</div>
+<div>
+<p class="text-sm text-on-surface-variant font-medium">Estimated Load</p>
+<p class="text-lg font-bold">450kg Organic Waste</p>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-lowest p-4 rounded-2xl">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+</div>
+<div>
+<p class="text-sm text-on-surface-variant font-medium">Time Window</p>
+<p class="text-lg font-bold">08:00 AM - 10:30 AM</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Proof of Collection -->
+<section class="mb-12">
+<h3 class="font-headline font-bold text-lg mb-4 px-2">Job Verification</h3>
+<div class="w-full h-64 border-4 border-dashed border-outline-variant/30 rounded-[2rem] flex flex-col items-center justify-center gap-4 bg-surface-container-low/50 cursor-pointer hover:bg-surface-container-low transition-colors group">
+<div class="w-20 h-20 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary-dim shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined !text-4xl" data-icon="add_a_photo" style="font-variation-settings: 'FILL' 1;">add_a_photo</span>
+</div>
+<div class="text-center">
+<p class="text-lg font-extrabold font-headline">Upload Proof of Collection</p>
+<p class="text-on-surface-variant font-medium">(Take Photo of Bins)</p>
+</div>
+</div>
+<!-- Optional: Preview area (hidden until photo taken) -->
+<div class="hidden mt-4 grid grid-cols-2 gap-4">
+<div class="aspect-square bg-surface-container-highest rounded-2xl relative">
+<img alt="Photo 1" class="w-full h-full object-cover rounded-2xl" data-alt="rugged green waste bins lined up against brick wall industrial setting daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmyO6xIgBbF3SHCunt4kIy1zhUyONN_KocMyLEBPa46WZGA3alMekU44c9RyB0t8bBARgLTd0gvBCRb4aftyKB2b1aOYFJrcd9ay9t9QVNJDNXVoO1QVLkTjLXtznpPrhzP4hlw6ubt7XLqGf0IEdO-WJ00icC-A_fithMN2Sg4ozRndMoglbUXkXMiE0G9u9VXpcYpBKDXsITp9neBzpX0GLF9xYu00Tq69dNmqGshUAnHS3D9Mto2k1Le5ZChFpA6aO7MXqpOA"/>
+<button class="absolute top-2 right-2 bg-error rounded-full p-1 text-white">
+<span class="material-symbols-outlined !text-sm" data-icon="close">close</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 w-full p-6 bg-surface/95 backdrop-blur-xl border-t border-outline-variant/10">
+<button class="w-full bg-primary text-on-primary py-5 rounded-3xl font-headline font-black text-xl flex items-center justify-center gap-4 shadow-[0_12px_32px_rgba(23,106,33,0.3)] active:scale-95 transition-all">
+<span class="material-symbols-outlined !text-3xl" data-icon="task_alt" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+            Mark as Completed
+        </button>
+</div>
+</body></html>

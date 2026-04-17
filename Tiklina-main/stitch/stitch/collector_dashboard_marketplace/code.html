@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tiklina - Waste Collector Dashboard</title>
+<!-- Google Fonts: Manrope & Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed-dim": "#00dbee",
+              "on-surface-variant": "#595c5d",
+              "primary": "#176a21",
+              "error-container": "#f95630",
+              "on-tertiary-fixed": "#003d43",
+              "tertiary-fixed": "#10eafe",
+              "tertiary-container": "#10eafe",
+              "primary-container": "#9df197",
+              "primary-dim": "#025d16",
+              "on-primary-fixed": "#00460e",
+              "surface-variant": "#dadddf",
+              "on-error-container": "#520c00",
+              "error": "#b02500",
+              "on-secondary": "#fff0e6",
+              "on-primary": "#d1ffc8",
+              "on-secondary-fixed-variant": "#7b4200",
+              "surface-dim": "#d1d5d7",
+              "on-background": "#2c2f30",
+              "on-tertiary-container": "#005159",
+              "background": "#f5f6f7",
+              "secondary-dim": "#7a4100",
+              "on-tertiary-fixed-variant": "#005c64",
+              "surface-container-high": "#e0e3e4",
+              "tertiary": "#00656f",
+              "on-primary-fixed-variant": "#12661e",
+              "surface-container-highest": "#dadddf",
+              "surface-tint": "#176a21",
+              "inverse-primary": "#9df197",
+              "outline-variant": "#abadae",
+              "error-dim": "#b92902",
+              "on-secondary-fixed": "#522a00",
+              "surface-bright": "#f5f6f7",
+              "on-tertiary": "#d4f9ff",
+              "surface-container-low": "#eff1f2",
+              "on-error": "#ffefec",
+              "on-surface": "#2c2f30",
+              "surface": "#f5f6f7",
+              "secondary-fixed": "#ffc698",
+              "tertiary-dim": "#005861",
+              "primary-fixed-dim": "#90e28a",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-container": "#6e3a00",
+              "on-primary-container": "#005c15",
+              "inverse-on-surface": "#9b9d9e",
+              "outline": "#757778",
+              "secondary-fixed-dim": "#ffb472",
+              "secondary-container": "#ffc698",
+              "inverse-surface": "#0c0f10",
+              "secondary": "#8b4b00",
+              "primary-fixed": "#9df197",
+              "surface-container": "#e6e8ea"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#f5f6f7]/80 backdrop-blur-3xl flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#176a21] text-2xl" data-icon="eco">eco</span>
+<h1 class="font-headline font-bold text-lg tracking-tight text-on-surface">Pickup Requests</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary-container overflow-hidden">
+<img alt="User Profile" data-alt="portrait of a cheerful man wearing a green polo shirt in a sunlit outdoors environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9Xu5jBt03ImS7YQb6LrGyDoyzEsz6XVAXY9iKoLLOcDcW6KQRbsV8ECtHJ7dGo7-Cv3OklvJ6AZwnJS4e0I0_u5-f4ebKwhF81m5rpio7S0gFWkkPmm9e4ipsOYBqxQMCbEPQHGZf9ddpmmMyr_ZxDEh7ScqsxrQCNjxjOzAbEP2KzNgRfOQ1Uw0jUOAutbkEe92jaCE6jC1w83nmbK3Rs4DX_05suInY4cDlTNrH2ZcDtedT-RXNahDJBz3VDYDR8f79sZrr2Q"/>
+</div>
+</div>
+</header>
+<main class="relative pt-16 h-screen flex flex-col overflow-hidden">
+<!-- Map Section (Top Half) -->
+<section class="absolute inset-0 z-0 h-[60%] w-full">
+<div class="relative h-full w-full bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="stylized architectural city map aerial view with soft shadows and clean muted colors" data-location="San Francisco" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCT0ga4qEAAy672TQuY_gP4dCtmxKb6QPISLF4rUCuItLiGfVMO6Bjhvy1OEYzY2SbmqaVyXEaKZXFFKHzHmOoRmMELy3toNazWGhs3TGOiBliWeJ4dtHeNlPoEwWVe3626VDvJKz6tHda5XDR6bGLFLixRWq-9zaZ7bdL24zIHRxazJc-VkuVS0oFbvQZC_jMdeAN7fEwoTcZAt_ekKMxfJY3OwGQSR_CHVR8qPvHlFxj_7mM8XXcDtdyKeYr6ijVzTw5IVdso0A"/>
+<!-- Map UI Elements (Pins) -->
+<div class="absolute top-[30%] left-[25%] active:scale-110 transition-transform">
+<div class="bg-primary p-2 rounded-full shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-sm" data-icon="delete_sweep">delete_sweep</span>
+</div>
+<div class="absolute top-full left-1/2 -translate-x-1/2 w-0.5 h-2 bg-primary"></div>
+</div>
+<div class="absolute top-[45%] left-[60%] active:scale-110 transition-transform">
+<div class="bg-secondary p-2 rounded-full shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary text-sm" data-icon="warning" data-weight="fill" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div class="absolute top-full left-1/2 -translate-x-1/2 w-0.5 h-2 bg-secondary"></div>
+</div>
+<div class="absolute top-[20%] left-[75%] active:scale-110 transition-transform">
+<div class="bg-primary p-2 rounded-full shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-sm" data-icon="delete_sweep">delete_sweep</span>
+</div>
+<div class="absolute top-full left-1/2 -translate-x-1/2 w-0.5 h-2 bg-primary"></div>
+</div>
+<!-- Floating Location Button -->
+<button class="absolute right-6 bottom-32 bg-surface-container-lowest w-12 h-12 rounded-2xl shadow-[0_8px_24px_rgba(44,47,48,0.1)] flex items-center justify-center text-primary active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="my_location">my_location</span>
+</button>
+</div>
+</section>
+<!-- Bottom Sheet Draggable List (Bottom Half) -->
+<section class="absolute bottom-0 w-full h-[55%] z-10 bg-surface rounded-t-3xl shadow-[0_-12px_40px_rgba(44,47,48,0.12)] border-t border-outline-variant/10 flex flex-col">
+<!-- Drag Handle -->
+<div class="w-full flex flex-col items-center py-4">
+<div class="w-10 h-1 rounded-full bg-outline-variant/30"></div>
+<div class="mt-4 px-6 w-full flex justify-between items-center">
+<h2 class="font-headline font-bold text-xl text-on-surface">Nearby Jobs</h2>
+<span class="px-3 py-1 bg-primary-container text-on-primary-container font-label text-xs font-semibold rounded-full">12 Available</span>
+</div>
+</div>
+<!-- Scrollable Job Cards -->
+<div class="flex-1 overflow-y-auto px-6 pb-24 hide-scrollbar space-y-4">
+<!-- Job Card 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-3xl shadow-[0_4px_16px_rgba(44,47,48,0.04)] flex gap-4 transition-all hover:shadow-md">
+<div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="neatly stacked cardboard boxes and paper waste in a commercial recycling area" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6XTbIUKldhRucZeqydZ1NMk_4oAwzXa0FErU8y2UABIM2chlQrDkmTwy97tQ8zHK3AFxUW_I1D_Eepvx41vkqlC9szOd5uxSUkeftk883JBJGfL6ct7g-J99UgGaZxFyRfDMSkX3UsX2d4Wn01kE6oHkMPm3NdDOIbbC5xrEEyeFONWDi5cE6pjtnupBmKcbURIFVAnZsWzRGCTLiY7Lk7VFPcQgqdgIWPcv-_RRFyD5L5mRfeD38N-OmAZ1zAbA0A8kT6BYemQ"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline font-bold text-on-surface">Green Valley Market</h3>
+<span class="text-on-surface-variant font-label text-xs">2 km away</span>
+</div>
+<p class="text-on-surface-variant font-body text-sm mt-0.5">Estimated 150kg • Paper &amp; Cardboard</p>
+</div>
+<div class="flex items-center justify-end mt-2">
+<button class="px-5 py-2 text-primary text-sm font-semibold rounded-full border border-outline-variant/20 hover:bg-primary/5 active:scale-95 transition-all">
+                                View Details
+                            </button>
+</div>
+</div>
+</div>
+<!-- Job Card 2 -->
+<div class="bg-surface-container-lowest p-4 rounded-3xl shadow-[0_4px_16px_rgba(44,47,48,0.04)] flex gap-4 transition-all hover:shadow-md">
+<div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="various colored glass bottles collected for recycling in a clean container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2zBqjOzy5hJW1VaGzu-rFk5ye2qqUL9xPpe4OYUlxcoh5VaaiWXl9_Iab9HO48sMTY1y7cyHshbKo4nU5VCIiSkyAwF9jy3mqC_VuAaSGHPYBGDugswYa6DdGd51wA6ocQdaL7rObCMlYj_Stlg_MqwHitGw5ck_ceietibn44LG35mHj8l8LFbdD-r4gQ5WhCoQTK_-zjmXoaiXXKBXTZpq2HR2V7ppjdQls8NQo3qTYVcA_dgRPG6lUm1iwZtfa-uKAKFLPvQ"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline font-bold text-on-surface">Coastal Bistro</h3>
+<span class="text-on-surface-variant font-label text-xs">0.8 km away</span>
+</div>
+<p class="text-on-surface-variant font-body text-sm mt-0.5">Estimated 45kg • Glass &amp; Plastic</p>
+</div>
+<div class="flex items-center justify-end mt-2">
+<button class="px-5 py-2 text-primary text-sm font-semibold rounded-full border border-outline-variant/20 hover:bg-primary/5 active:scale-95 transition-all">
+                                View Details
+                            </button>
+</div>
+</div>
+</div>
+<!-- Job Card 3 -->
+<div class="bg-surface-container-lowest p-4 rounded-3xl shadow-[0_4px_16px_rgba(44,47,48,0.04)] flex gap-4 transition-all hover:shadow-md">
+<div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="metal scrap and aluminium cans gathered for industrial waste collection" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBphC8mj5IjnML8nBNmx2_9Yb9qa4eSvRIk9XSALcmSGpxVX2DG5QX9T7bhCqeLfAmT1P8rlwPAl5FxU5PtngHuhIkiW7xTyBXX3f6mjROP3BRFAy5S-yn4JHnT5aHWdTel2iQXfmzplazi1Su1ik_qDUcoCGVo9GFCWpp2jFzXbBU6G_Ly6k5wvyKuyaOXQsQGyZZqPVSDuEQCL7DN6m8LK4D-umJRG3ueMsmxEp-NcbKBOtfHcRrHJwQPl__iGfVxep3IxGhJyw"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline font-bold text-on-surface">Old Town Hardware</h3>
+<span class="text-on-surface-variant font-label text-xs">3.5 km away</span>
+</div>
+<p class="text-on-surface-variant font-body text-sm mt-0.5">Estimated 300kg • Mixed Metal</p>
+</div>
+<div class="flex items-center justify-end mt-2">
+<button class="px-5 py-2 text-primary text-sm font-semibold rounded-full border border-outline-variant/20 hover:bg-primary/5 active:scale-95 transition-all">
+                                View Details
+                            </button>
+</div>
+</div>
+</div>
+<!-- Job Card 4 -->
+<div class="bg-surface-container-lowest p-4 rounded-3xl shadow-[0_4px_16px_rgba(44,47,48,0.04)] flex gap-4 transition-all hover:shadow-md">
+<div class="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="organic waste and composting materials in a sustainable kitchen environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbYUP3dY9Pm83QR0DhlxfIcGQwrn5fuOYLIU-kbw1glW2DdvUat_OiT4VyG_yHu9iL56ykHzyfgB32bRAS6Tx3PTA92TFczQ_vo4u2NOGMlneeLLvgVmWG6DECjHN9-EqIs7bKA41k8grYwiyfmzsmyBVUBwszSkW-bjFey800CHxN3QgDTqdmFqkEmkCnfJdWRrzHuHE9C0L-fNqQd2xq71YsSU7beEn7G6jZOtcUxCGF7d8oqedqsVrAXIef_zAJEejJiSxMnQ"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline font-bold text-on-surface">Flora Cafe</h3>
+<span class="text-on-surface-variant font-label text-xs">1.2 km away</span>
+</div>
+<p class="text-on-surface-variant font-body text-sm mt-0.5">Estimated 12kg • Organic Waste</p>
+</div>
+<div class="flex items-center justify-end mt-2">
+<button class="px-5 py-2 text-primary text-sm font-semibold rounded-full border border-outline-variant/20 hover:bg-primary/5 active:scale-95 transition-all">
+                                View Details
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full h-20 flex justify-around items-center px-4 pb-safe bg-white/80 backdrop-blur-3xl border-t border-[#2c2f30]/10 z-50 shadow-[0_-8px_24px_rgba(44,47,48,0.06)] rounded-t-[2rem]">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-[#2c2f30]/60 px-5 py-1.5 hover:bg-[#f5f6f7] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="grid_view">grid_view</span>
+<span class="font-['Inter'] font-medium text-[11px]">Home</span>
+</a>
+<!-- Market (Active) -->
+<a class="flex flex-col items-center justify-center bg-[#176a21]/10 text-[#176a21] rounded-2xl px-5 py-1.5 active:scale-90 duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="map" data-weight="fill" style="font-variation-settings: 'FILL' 1;">map</span>
+<span class="font-['Inter'] font-medium text-[11px]">Market</span>
+</a>
+<!-- Activity -->
+<a class="flex flex-col items-center justify-center text-[#2c2f30]/60 px-5 py-1.5 hover:bg-[#f5f6f7] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="receipt_long">receipt_long</span>
+<span class="font-['Inter'] font-medium text-[11px]">Activity</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-[#2c2f30]/60 px-5 py-1.5 hover:bg-[#f5f6f7] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-['Inter'] font-medium text-[11px]">Profile</span>
+</a>
+</nav>
+</body></html>
