@@ -256,14 +256,17 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _label(String text) => Text(
-    text,
-    style: const TextStyle(
-      fontFamily: 'Manrope',
-      fontWeight: FontWeight.bold,
-      fontSize: 12,
-      letterSpacing: 1.5,
-      color: Color(0xFF595C5D),
+  Widget _label(String text) => Align(
+    alignment: Alignment.centerLeft,
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontFamily: 'Manrope',
+        fontWeight: FontWeight.bold,
+        fontSize: 12,
+        letterSpacing: 1.5,
+        color: Color(0xFF595C5D),
+      ),
     ),
   );
 

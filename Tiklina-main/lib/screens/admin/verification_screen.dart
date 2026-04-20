@@ -102,24 +102,13 @@ class _VerificationScreenState extends State<VerificationScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            RichText(
+            const Text(
+              'Review the collection completion',
               textAlign: TextAlign.center,
-              text: const TextSpan(
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 14,
-                  color: Color(0xFF595C5D),
-                ),
-                children: [
-                  TextSpan(text: 'Job ID: #TK-8829 • Collected by '),
-                  TextSpan(
-                    text: 'Alex Green',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C2F30),
-                    ),
-                  ),
-                ],
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 14,
+                color: Color(0xFF595C5D),
               ),
             ),
 
@@ -249,21 +238,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        RichText(
-                          text: const TextSpan(
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 14,
-                              color: Color(0xFF2C2F30),
-                            ),
-                            children: [
-                              TextSpan(text: 'This collection diverted '),
-                              TextSpan(
-                                text: '12.4kg',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              TextSpan(text: ' of waste from local landfills.'),
-                            ],
+                        const Text(
+                          'Help keep the environment clean',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14,
+                            color: Color(0xFF2C2F30),
                           ),
                         ),
                       ],
@@ -296,7 +276,6 @@ class _VerificationScreenState extends State<VerificationScreen> {
               ),
               child: ElevatedButton(
                 onPressed: () {
-                  // Fake success popup
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       backgroundColor: const Color(0xFF2C2F30),
@@ -304,34 +283,22 @@ class _VerificationScreenState extends State<VerificationScreen> {
                         borderRadius: BorderRadius.circular(24),
                       ),
                       behavior: SnackBarBehavior.floating,
-                      content: Row(
+                      content: const Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF176A21),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.eco,
-                              color: Colors.white,
-                              size: 16,
-                            ),
+                          Icon(
+                            Icons.check_circle,
+                            color: Color(0xFF9DF197),
+                            size: 20,
                           ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            '+15 Green Points for verifying',
+                          SizedBox(width: 12),
+                          Text(
+                            'Verification submitted successfully',
                             style: TextStyle(
                               fontFamily: 'Inter',
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
-                      ),
-                      action: SnackBarAction(
-                        label: 'CLOSE',
-                        textColor: Colors.white,
-                        onPressed: () {},
                       ),
                     ),
                   );

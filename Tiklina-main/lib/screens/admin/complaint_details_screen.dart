@@ -7,43 +7,157 @@ class ComplaintDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Complaint Details')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
+      backgroundColor: const Color(0xFFF5F6F7),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF5F6F7),
+        elevation: 0,
+        title: const Text(
+          'Complaint Details',
+          style: TextStyle(
+            fontFamily: 'Manrope',
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: Color(0xFF2C2F30),
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Status: Collected by Company',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.green,
-                fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF9DF197),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          'PENDING',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            color: Color(0xFF005C15),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No complaint details available',
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF2C2F30),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Complaint details will appear here once a report is submitted.',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      color: Color(0xFF595C5D),
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 10),
-            Text('Reported on: 24 Mar 2026'),
-            SizedBox(height: 20),
-            Container(
-              height: 150,
-              color: Colors.grey.shade300,
-              child: Center(child: Text('Original Photo')),
+            const SizedBox(height: 24),
+            
+            // Photo placeholders
+            const Text(
+              'Evidence Photos',
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Color(0xFF2C2F30),
+              ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 12),
             Container(
-              height: 150,
-              color: Colors.grey.shade300,
-              child: Center(child: Text('Collector Proof Photo')),
+              height: 180,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF1F2),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.photo_outlined,
+                      color: Color(0xFFABACAE),
+                      size: 40,
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'No photos available',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                        color: Color(0xFF595C5D),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            Spacer(),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => VerificationScreen()),
-                );
-              },
-              child: Text('Verify & Rate Collection'),
+            const SizedBox(height: 40),
+            
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const VerificationScreen(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF176A21),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Text(
+                  'Verify & Rate Collection',
+                  style: TextStyle(
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Color(0xFFD1FFC8),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

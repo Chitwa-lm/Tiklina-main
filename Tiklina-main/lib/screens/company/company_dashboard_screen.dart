@@ -180,123 +180,164 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
   // ── Home Tab ──────────────────────────────────────────────────────────────
 
   Widget _buildHomeTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Good morning,',
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w800,
-              fontSize: 32,
-              letterSpacing: -0.5,
-              color: Color(0xFF2C2F30),
-            ),
-          ),
-          Text(
-            _companyName,
-            style: const TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w800,
-              fontSize: 32,
-              letterSpacing: -0.5,
-              color: Color(0xFF176A21),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatItem('12', 'Jobs\nAvailable'),
-                _buildDivider(),
-                _buildStatItem('4', 'Completed\nToday'),
-                _buildDivider(),
-                _buildStatItem('82%', 'Efficiency\nRate'),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer<JobStore>(
+      builder: (context, store, _) {
+        final availableCount = store.availableJobs.length;
+        final completedToday = store.jobs
+            .where((j) => j.status == JobStatus.completed)
+            .length;
+        final recentJobs = store.jobs.take(2).toList();
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Recent Jobs',
+                'Good morning,',
                 style: TextStyle(
                   fontFamily: 'Manrope',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 32,
+                  letterSpacing: -0.5,
                   color: Color(0xFF2C2F30),
                 ),
               ),
-              TextButton(
-                onPressed: () => setState(() => _selectedIndex = 2),
-                child: const Text(
-                  'View All',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Color(0xFF176A21),
+              Text(
+                _companyName,
+                style: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 32,
+                  letterSpacing: -0.5,
+                  color: Color(0xFF176A21),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStatItem('$availableCount', 'Jobs\nAvailable'),
+                    _buildDivider(),
+                    _buildStatItem('$completedToday', 'Completed\nToday'),
+                    _buildDivider(),
+                    _buildStatItem('--', 'Efficiency\nRate'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Recent Jobs',
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Color(0xFF2C2F30),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => setState(() => _selectedIndex = 2),
+                    child: const Text(
+                      'View All',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: Color(0xFF176A21),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              if (recentJobs.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEFF1F2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.inbox_outlined,
+                            color: Color(0xFFABACAE),
+                            size: 30,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'No recent jobs',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14,
+                            color: Color(0xFF595C5D),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                ...recentJobs.map((job) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _buildRecentJobTile(
+                    job.location,
+                    job.statusLabel,
+                    job.statusBgColor,
+                    job.statusColor,
+                  ),
+                )),
+              
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: () => setState(() => _selectedIndex = 1),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF176A21),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                  icon: const Icon(Icons.map, color: Color(0xFFD1FFC8)),
+                  label: const Text(
+                    'Find Nearby Jobs',
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFFD1FFC8),
+                    ),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          _buildRecentJobTile(
-            'Green Valley Market',
-            'Completed',
-            const Color(0xFF9DF197),
-            const Color(0xFF005C15),
-          ),
-          const SizedBox(height: 12),
-          _buildRecentJobTile(
-            'Coastal Bistro',
-            'In Progress',
-            const Color(0xFFFFC698),
-            const Color(0xFF6E3A00),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton.icon(
-              onPressed: () => setState(() => _selectedIndex = 1),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF176A21),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
-                ),
-              ),
-              icon: const Icon(Icons.map, color: Color(0xFFD1FFC8)),
-              label: const Text(
-                'Find Nearby Jobs',
-                style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Color(0xFFD1FFC8),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
