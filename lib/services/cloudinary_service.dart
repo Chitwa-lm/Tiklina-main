@@ -62,15 +62,12 @@ class CloudinaryService {
   }
 
   /// Delete an image from Cloudinary using its public ID
+  /// Note: Cloudinary public package doesn't support deletion
+  /// Use Cloudinary admin API or dashboard for deletion
   Future<void> deleteImage(String publicId) async {
-    try {
-      await _cloudinary.deleteFile(
-        publicId: publicId,
-        resourceType: CloudinaryResourceType.Image,
-        invalidate: true,
-      );
-    } catch (e) {
-      throw Exception('Failed to delete image: $e');
-    }
+    throw UnimplementedError(
+      'Image deletion is not supported with unsigned uploads. '
+      'Please use Cloudinary dashboard or implement signed uploads with admin API.',
+    );
   }
 }
