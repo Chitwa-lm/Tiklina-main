@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tiklini/screens/auth/login_screen.dart';
+import 'package:tiklini/screens/auth/user_selection_screen.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -14,7 +14,7 @@ class SplashScreen extends StatelessWidget {
             center: Alignment.topLeft,
             radius: 1.5,
             colors: [
-              const Color(0xFF176A21).withOpacity(0.08),
+              const Color(0xFF176A21).withValues(alpha: 0.08),
               Colors.transparent,
             ],
             stops: [0.0, 0.5],
@@ -39,7 +39,7 @@ class SplashScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -110,9 +110,8 @@ class SplashScreen extends StatelessWidget {
                   title: 'I am a Market Admin',
                   subtitle: 'Manage stalls and waste collection schedules.',
                   icon: Icons.storefront,
-                  iconBgColor: const Color(0xFFFFC698), // secondary-container
-                  iconColor: const Color(0xFF6E3A00), // on-secondary-container
-                  role: 'Admin',
+                  iconBgColor: const Color(0xFFFFC698),
+                  iconColor: const Color(0xFF6E3A00),
                 ),
                 const SizedBox(height: 24),
                 _buildRoleCard(
@@ -120,9 +119,8 @@ class SplashScreen extends StatelessWidget {
                   title: 'I am a Waste Collector',
                   subtitle: 'Find nearby pickups and optimize your routes.',
                   icon: Icons.local_shipping,
-                  iconBgColor: const Color(0xFF9DF197), // primary-container
-                  iconColor: const Color(0xFF005C15), // on-primary-container
-                  role: 'Company',
+                  iconBgColor: const Color(0xFF9DF197),
+                  iconColor: const Color(0xFF005C15),
                 ),
 
                 const Spacer(),
@@ -133,7 +131,7 @@ class SplashScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF1F2), // surface-container-low
+                    color: const Color(0xFFEFF1F2),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Row(
@@ -176,24 +174,27 @@ class SplashScreen extends StatelessWidget {
     required IconData icon,
     required Color iconBgColor,
     required Color iconColor,
-    required String role,
   }) {
     return Material(
-      color: Colors.white.withOpacity(0.8),
+      color: Colors.white.withValues(alpha: 0.8),
       borderRadius: BorderRadius.circular(24),
       elevation: 0,
       child: InkWell(
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => LoginScreen(role: role)),
+            MaterialPageRoute(
+              builder: (context) => const UserSelectionScreen(),
+            ),
           );
         },
         borderRadius: BorderRadius.circular(24),
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFABACAE).withOpacity(0.1)),
+            border: Border.all(
+              color: const Color(0xFFABACAE).withValues(alpha: 0.1),
+            ),
             borderRadius: BorderRadius.circular(24),
           ),
           child: Row(

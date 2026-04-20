@@ -25,7 +25,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
       appBar: widget.embedded
           ? null
           : AppBar(
-              backgroundColor: const Color(0xFFF5F6F7).withOpacity(0.9),
+              backgroundColor: const Color(0xFFF5F6F7).withValues(alpha: 0.9),
               elevation: 0,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Color(0xFF2C2F30)),
@@ -70,7 +70,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF9DF197).withOpacity(0.3),
+                color: const Color(0xFF9DF197).withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Row(
@@ -122,7 +122,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2C2F30).withOpacity(0.04),
+                    color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -150,7 +150,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                           index < _rating ? Icons.star : Icons.star_border,
                           color: index < _rating
                               ? const Color(0xFF8B4B00)
-                              : const Color(0xFF8B4B00).withOpacity(0.3),
+                              : const Color(0xFF8B4B00).withValues(alpha: 0.3),
                         ),
                         onPressed: () {
                           setState(() {
@@ -185,7 +185,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       decoration: InputDecoration(
                         hintText: 'Tell us about the service...',
                         hintStyle: TextStyle(
-                          color: const Color(0xFFABACAE).withOpacity(0.8),
+                          color: const Color(0xFFABACAE).withValues(alpha: 0.8),
                           fontSize: 14,
                         ),
                         border: OutlineInputBorder(
@@ -205,9 +205,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF10EAFE).withOpacity(0.1),
+                color: const Color(0xFF10EAFE).withValues(alpha: 0.1),
                 border: Border.all(
-                  color: const Color(0xFF10EAFE).withOpacity(0.2),
+                  color: const Color(0xFF10EAFE).withValues(alpha: 0.2),
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -268,7 +268,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF176A21).withOpacity(0.2),
+                    color: const Color(0xFF176A21).withValues(alpha: 0.2),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -359,12 +359,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
           border: isBefore
               ? null
               : Border.all(
-                  color: const Color(0xFF9DF197).withOpacity(0.4),
+                  color: const Color(0xFF9DF197).withValues(alpha: 0.4),
                   width: 4,
                 ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF2C2F30).withOpacity(0.04),
+              color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -424,8 +424,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: isBefore
-                      ? Colors.black.withOpacity(0.4)
-                      : const Color(0xFF176A21).withOpacity(0.8),
+                      ? Colors.black.withValues(alpha: 0.4)
+                      : const Color(0xFF176A21).withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(

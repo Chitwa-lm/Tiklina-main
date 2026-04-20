@@ -9,7 +9,7 @@ class JobExecutionScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6F7),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F6F7).withOpacity(0.9),
+        backgroundColor: const Color(0xFFF5F6F7).withValues(alpha: 0.9),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF176A21)),
@@ -51,7 +51,7 @@ class JobExecutionScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2C2F30).withOpacity(0.04),
+                        color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
@@ -142,7 +142,9 @@ class JobExecutionScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       blurRadius: 12,
                                     ),
                                   ],
@@ -189,7 +191,9 @@ class JobExecutionScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF176A21).withOpacity(0.2),
+                              color: const Color(
+                                0xFF176A21,
+                              ).withValues(alpha: 0.2),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -258,7 +262,9 @@ class JobExecutionScreen extends StatelessWidget {
                               color: const Color(0xFFFFC698),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: const Color(0xFF8B4B00).withOpacity(0.2),
+                                color: const Color(
+                                  0xFF8B4B00,
+                                ).withValues(alpha: 0.2),
                               ),
                             ),
                             child: const Text(
@@ -309,10 +315,10 @@ class JobExecutionScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 250,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF1F2).withOpacity(0.5),
+                    color: const Color(0xFFEFF1F2).withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(32),
                     border: Border.all(
-                      color: const Color(0xFFABACAE).withOpacity(0.5),
+                      color: const Color(0xFFABACAE).withValues(alpha: 0.5),
                       width: 4,
                       // Note: dashed border simulation omitted, solid border used for simplicity
                     ),
@@ -375,10 +381,10 @@ class JobExecutionScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F6F7).withOpacity(0.95),
+                color: const Color(0xFFF5F6F7).withValues(alpha: 0.95),
                 border: Border(
                   top: BorderSide(
-                    color: const Color(0xFFABACAE).withOpacity(0.1),
+                    color: const Color(0xFFABACAE).withValues(alpha: 0.1),
                   ),
                 ),
               ),
@@ -390,7 +396,7 @@ class JobExecutionScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF176A21).withOpacity(0.3),
+                      color: const Color(0xFF176A21).withValues(alpha: 0.3),
                       blurRadius: 32,
                       offset: const Offset(0, 12),
                     ),
@@ -455,7 +461,7 @@ class JobExecutionScreen extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF176A21).withOpacity(0.1),
+              color: const Color(0xFF176A21).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: const Color(0xFF176A21)),

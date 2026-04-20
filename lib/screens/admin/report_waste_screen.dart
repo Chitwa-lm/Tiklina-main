@@ -46,7 +46,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
       appBar: widget.embedded
           ? null
           : AppBar(
-              backgroundColor: const Color(0xFFF5F6F7).withOpacity(0.9),
+              backgroundColor: const Color(0xFFF5F6F7).withValues(alpha: 0.9),
               elevation: 0,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Color(0xFF2C2F30)),
@@ -259,7 +259,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
                       hintText:
                           'Describe what you see (e.g. household items, garden waste, chemicals)...',
                       hintStyle: TextStyle(
-                        color: const Color(0xFFABACAE).withOpacity(0.8),
+                        color: const Color(0xFFABACAE).withValues(alpha: 0.8),
                         fontSize: 14,
                       ),
                       border: OutlineInputBorder(
@@ -310,8 +310,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
                           )
                           .toList(),
                       onChanged: (val) {
-                        if (val != null)
+                        if (val != null) {
                           setState(() => _selectedCategory = val);
+                        }
                       },
                     ),
                   ),
@@ -372,7 +373,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
                           thumbColor: const Color(0xFF176A21),
                           overlayColor: const Color(
                             0xFF176A21,
-                          ).withOpacity(0.2),
+                          ).withValues(alpha: 0.2),
                           thumbShape: const RoundSliderThumbShape(
                             enabledThumbRadius: 12.0,
                           ),
@@ -420,7 +421,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F6F7).withOpacity(0.8),
+                color: const Color(0xFFF5F6F7).withValues(alpha: 0.8),
               ),
               child: Container(
                 width: double.infinity,
@@ -434,7 +435,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF176A21).withOpacity(0.2),
+                      color: const Color(0xFF176A21).withValues(alpha: 0.2),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
                     ),

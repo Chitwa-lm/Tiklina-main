@@ -1,4 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'supabase_service.dart';
 
 class DatabaseService {
@@ -107,19 +106,25 @@ class DatabaseService {
     required double locationLat,
     required double locationLng,
   }) async {
-    final evidenceList = photoUrls.map((url) => {
-      'report_id': reportId,
-      'photo_url': url,
-      'location_lat': locationLat,
-      'location_lng': locationLng,
-      'timestamp': DateTime.now().toIso8601String(),
-    }).toList();
+    final evidenceList = photoUrls
+        .map(
+          (url) => {
+            'report_id': reportId,
+            'photo_url': url,
+            'location_lat': locationLat,
+            'location_lng': locationLng,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        )
+        .toList();
 
     await _supabase.from('report_evidence').insert(evidenceList);
   }
 
   /// Get all waste reports for a specific user
-  Future<List<Map<String, dynamic>>> getWasteReportsByUser(String userId) async {
+  Future<List<Map<String, dynamic>>> getWasteReportsByUser(
+    String userId,
+  ) async {
     final response = await _supabase
         .from('waste_reports')
         .select('*, report_evidence(*)')
@@ -274,9 +279,7 @@ class DatabaseService {
   }
 
   /// Confirm collection by admin
-  Future<void> confirmCollection({
-    required String verificationId,
-  }) async {
+  Future<void> confirmCollection({required String verificationId}) async {
     await _supabase
         .from('collection_verifications')
         .update({'admin_confirmed': true})
@@ -312,7 +315,9 @@ class DatabaseService {
   }
 
   /// Get reviews for a company
-  Future<List<Map<String, dynamic>>> getReviewsByCompany(String companyId) async {
+  Future<List<Map<String, dynamic>>> getReviewsByCompany(
+    String companyId,
+  ) async {
     final response = await _supabase
         .from('reviews')
         .select('*')
@@ -325,14 +330,14 @@ class DatabaseService {
   /// Get average rating for a company
   Future<double> getCompanyAverageRating(String companyId) async {
     final reviews = await getReviewsByCompany(companyId);
-    
+
     if (reviews.isEmpty) return 0.0;
-    
+
     final totalRating = reviews.fold<int>(
       0,
       (sum, review) => sum + (review['rating'] as int),
     );
-    
+
     return totalRating / reviews.length;
   }
 }

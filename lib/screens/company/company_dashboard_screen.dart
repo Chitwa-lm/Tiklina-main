@@ -183,9 +183,8 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
     return Consumer<JobStore>(
       builder: (context, store, _) {
         final availableCount = store.availableJobs.length;
-        final completedToday = store.jobs
-            .where((j) => j.status == JobStatus.completed)
-            .length;
+        final completedToday =
+            store.jobs.where((j) => j.status == JobStatus.completed).length;
         final recentJobs = store.jobs.take(2).toList();
 
         return SingleChildScrollView(
@@ -266,7 +265,6 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              
               if (recentJobs.isEmpty)
                 Center(
                   child: Padding(
@@ -300,16 +298,17 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                   ),
                 )
               else
-                ...recentJobs.map((job) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildRecentJobTile(
-                    job.location,
-                    job.statusLabel,
-                    job.statusBgColor,
-                    job.statusColor,
+                ...recentJobs.map(
+                  (job) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildRecentJobTile(
+                      job.location,
+                      job.statusLabel,
+                      job.statusBgColor,
+                      job.statusColor,
+                    ),
                   ),
-                )),
-              
+                ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
@@ -878,7 +877,6 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
             ),
           ),
           const SizedBox(height: 32),
-
           const Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -951,11 +949,9 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
               ),
             ),
           ),
-
           const SizedBox(height: 32),
           const Divider(color: Color(0xFFDADDDF)),
           const SizedBox(height: 16),
-
           _buildProfileTile(
             Icons.notifications_outlined,
             'Notifications',
