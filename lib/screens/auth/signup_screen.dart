@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tiklini/services/auth_store.dart';
 import 'package:tiklini/services/supabase_service.dart';
 import 'package:tiklini/services/database_service.dart';
 import 'package:tiklini/services/cloudinary_service.dart';
 import 'login_screen.dart';
+
+enum UserRole { admin, collector }
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tiklini/services/database_service.dart';
 import 'package:tiklini/services/supabase_service.dart';
-import 'package:tiklini/services/auth_store.dart';
 import 'package:tiklini/screens/auth/login_screen.dart';
 import 'package:tiklini/screens/company/job_execution_screen.dart';
 
@@ -107,33 +106,6 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to accept job: $e'),
-            backgroundColor: Color(0xFFB02500),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _markAsCompleted(String reportId) async {
-    try {
-      await DatabaseService.instance.updateWasteReportStatus(
-        reportId: reportId,
-        status: 'Completed',
-      );
-      await _loadReports();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Job marked as completed!'),
-            backgroundColor: Color(0xFF176A21),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to update status: $e'),
             backgroundColor: Color(0xFFB02500),
           ),
         );
@@ -1049,92 +1021,41 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                               const SizedBox(height: 12),
                               Row(
                                 children: [
-                                  if (!isCompleted)
-                                    Expanded(
-                                      child: OutlinedButton.icon(
-                                        onPressed: () {
-                                          final reportId = report['id'];
-                                          if (reportId != null) {
-                                            _markAsCompleted(
-                                                reportId.toString());
-                                          }
-                                        },
-                                        icon: const Icon(
-                                            Icons.check_circle_outline,
-                                            size: 18),
-                                        label: const Text('Mark as Completed'),
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor:
-                                              const Color(0xFF176A21),
-                                          side: const BorderSide(
-                                              color: Color(0xFF176A21)),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      onPressed: () async {
+                                        final result = await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                JobExecutionScreen(job: report),
                                           ),
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 12),
-                                        ),
+                                        );
+                                        // Refresh data if job was completed
+                                        if (result == true) {
+                                          _loadReports();
+                                        }
+                                      },
+                                      icon: Icon(
+                                        isCompleted
+                                            ? Icons.visibility
+                                            : Icons.work_outline,
+                                        size: 18,
                                       ),
-                                    )
-                                  else
-                                    Expanded(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 12),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF9DF197)
-                                              .withValues(alpha: 0.2),
+                                      label: Text(isCompleted
+                                          ? 'View Details'
+                                          : 'Execute Job'),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor:
+                                            const Color(0xFF176A21),
+                                        side: const BorderSide(
+                                            color: Color(0xFF176A21)),
+                                        shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(12),
                                         ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: const [
-                                            Icon(
-                                              Icons.check_circle,
-                                              color: Color(0xFF005C15),
-                                              size: 18,
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              'Completed',
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
-                                                color: Color(0xFF005C15),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  const SizedBox(width: 12),
-                                  OutlinedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const JobExecutionScreen(),
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.visibility_outlined,
-                                        size: 18),
-                                    label: const Text('View'),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: const Color(0xFF595C5D),
-                                      side: const BorderSide(
-                                          color: Color(0xFFDADDDF)),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                        horizontal: 20,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12),
                                       ),
                                     ),
                                   ),
@@ -1301,13 +1222,15 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: TextButton(
-              onPressed: () {
-                AuthStore.instance.logout();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  (_) => false,
-                );
+              onPressed: () async {
+                await SupabaseService.instance.signOut();
+                if (mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (_) => false,
+                  );
+                }
               },
               child: const Text(
                 'Sign Out',

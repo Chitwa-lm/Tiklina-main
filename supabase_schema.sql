@@ -116,15 +116,15 @@ CREATE POLICY "Users can insert their own profile" ON profiles
 CREATE POLICY "Users can update their own profile" ON profiles
   FOR UPDATE USING (auth.uid() = user_id);
 
--- Waste Reports: Admins can create, everyone can read
+-- Waste Reports: Admins can create, everyone can read, collectors can update status
 CREATE POLICY "Waste reports are viewable by everyone" ON waste_reports
   FOR SELECT USING (true);
 
 CREATE POLICY "Authenticated users can create waste reports" ON waste_reports
   FOR INSERT WITH CHECK (auth.uid() = reporter_id);
 
-CREATE POLICY "Reporters can update their own reports" ON waste_reports
-  FOR UPDATE USING (auth.uid() = reporter_id);
+CREATE POLICY "Reporters and collectors can update reports" ON waste_reports
+  FOR UPDATE USING (auth.uid() = reporter_id OR auth.uid() = accepted_by OR auth.uid() IS NOT NULL);
 
 -- Report Evidence: Linked to waste reports
 CREATE POLICY "Report evidence is viewable by everyone" ON report_evidence

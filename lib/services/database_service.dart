@@ -131,17 +131,35 @@ class DatabaseService {
     return List<Map<String, dynamic>>.from(response);
   }
 
-  /// Get all waste reports (for syncing to JobStore)
+  /// Get all waste reports
   Future<List<Map<String, dynamic>>> getAllWasteReports() async {
-    final response = await _supabase.from('waste_reports').select('''
-          *,
-          collector:accepted_by(
-            id,
-            email
-          )
-        ''').order('reported_at', ascending: false);
+    final response = await _supabase
+        .from('waste_reports')
+        .select()
+        .order('reported_at', ascending: false);
 
-    return List<Map<String, dynamic>>.from(response);
+    final reports = List<Map<String, dynamic>>.from(response);
+
+    // For each report with accepted_by, get collector info from profiles
+    for (final report in reports) {
+      if (report['accepted_by'] != null) {
+        try {
+          final collectorProfile = await _supabase
+              .from('profiles')
+              .select('email')
+              .eq('user_id', report['accepted_by'])
+              .maybeSingle();
+
+          if (collectorProfile != null) {
+            report['collector'] = collectorProfile;
+          }
+        } catch (e) {
+          // If we can't get collector info, just continue
+        }
+      }
+    }
+
+    return reports;
   }
 
   /// Get a single waste report with evidence

@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tiklini/services/auth_store.dart';
 import 'package:tiklini/services/database_service.dart';
+import 'package:tiklini/services/supabase_service.dart';
 import 'package:tiklini/screens/auth/login_screen.dart';
 import 'package:tiklini/screens/admin/report_waste_screen.dart';
+import 'package:tiklini/screens/admin/verification_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   final String marketName;
@@ -30,19 +31,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   late String _location;
   File? _marketImage;
 
-  // Real reports added by the user via ReportWasteScreen
-  final List<Map<String, dynamic>> _reports = [];
-
   @override
   void initState() {
     super.initState();
     _marketName = widget.marketName;
     _location = widget.location;
     _marketImage = widget.marketImage;
-  }
-
-  void _addReport(Map<String, dynamic> report) {
-    setState(() => _reports.add(report));
   }
 
   Future<void> _showImageSourceSheet() async {
@@ -170,7 +164,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       case 0:
         return _buildHomeTab();
       case 1:
-        return ReportWasteScreen(embedded: true, onReportSubmitted: _addReport);
+        return ReportWasteScreen(embedded: true);
       case 2:
         return _buildHistoryTab();
       case 3:
@@ -338,6 +332,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         }
 
         final reports = snapshot.data ?? [];
+
         final pending = reports.where((r) => r['status'] == 'Submitted').length;
         final accepted = reports
             .where((r) =>
@@ -616,118 +611,161 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               ),
                             ],
                           ),
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                width: 52,
-                                height: 52,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEFF1F2),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: const Icon(
-                                  Icons.delete_outline,
-                                  color: Color(0xFFABACAE),
-                                  size: 26,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      report['market_name'] as String? ??
-                                          'Unknown location',
-                                      style: const TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                        color: Color(0xFF2C2F30),
-                                      ),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 52,
+                                    height: 52,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFEFF1F2),
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Row(
+                                    child: const Icon(
+                                      Icons.delete_outline,
+                                      color: Color(0xFFABACAE),
+                                      size: 26,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
-                                          'Mixed Waste',
-                                          style: TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontSize: 12,
-                                            color: Color(0xFF595C5D),
-                                          ),
-                                        ),
-                                        const Text(
-                                          ' · ',
-                                          style: TextStyle(
-                                            color: Color(0xFFABACAE),
-                                          ),
-                                        ),
                                         Text(
-                                          report['est_volume'] as String? ??
-                                              'Unknown',
+                                          report['market_name'] as String? ??
+                                              'Unknown location',
+                                          style: const TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                            color: Color(0xFF2C2F30),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            const Text(
+                                              'Mixed Waste',
+                                              style: TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontSize: 12,
+                                                color: Color(0xFF595C5D),
+                                              ),
+                                            ),
+                                            const Text(
+                                              ' · ',
+                                              style: TextStyle(
+                                                color: Color(0xFFABACAE),
+                                              ),
+                                            ),
+                                            Text(
+                                              report['est_volume'] as String? ??
+                                                  'Unknown',
+                                              style: const TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontSize: 12,
+                                                color: Color(0xFF595C5D),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 2),
+                                        // Show collector info if job is accepted
+                                        if (report['collector'] != null) ...[
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.person_outline,
+                                                size: 12,
+                                                color: Color(0xFF176A21),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                'Collector: ${(report['collector'] as Map<String, dynamic>)['email'] ?? 'Unknown'}',
+                                                style: const TextStyle(
+                                                  fontFamily: 'Inter',
+                                                  fontSize: 11,
+                                                  color: Color(0xFF176A21),
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 2),
+                                        ],
+                                        Text(
+                                          date,
                                           style: const TextStyle(
                                             fontFamily: 'Inter',
-                                            fontSize: 12,
-                                            color: Color(0xFF595C5D),
+                                            fontSize: 11,
+                                            color: Color(0xFFABACAE),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 2),
-                                    // Show collector info if job is accepted
-                                    if (report['collector'] != null) ...[
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.person_outline,
-                                            size: 12,
-                                            color: Color(0xFF176A21),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            'Collector: ${(report['collector'] as Map<String, dynamic>)['email'] ?? 'Unknown'}',
-                                            style: const TextStyle(
-                                              fontFamily: 'Inter',
-                                              fontSize: 11,
-                                              color: Color(0xFF176A21),
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 2),
-                                    ],
-                                    Text(
-                                      date,
-                                      style: const TextStyle(
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: statusBgColor,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      statusLabel.toUpperCase(),
+                                      style: TextStyle(
                                         fontFamily: 'Inter',
-                                        fontSize: 11,
-                                        color: Color(0xFFABACAE),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                        color: statusColor,
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: statusBgColor,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  statusLabel.toUpperCase(),
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 10,
-                                    color: statusColor,
+                              // Add verification button for completed jobs
+                              if (status == 'Completed') ...[
+                                const SizedBox(height: 12),
+                                const Divider(color: Color(0xFFEFF1F2)),
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: OutlinedButton.icon(
+                                    onPressed: () async {
+                                      final result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              VerificationScreen(job: report),
+                                        ),
+                                      );
+                                      // Refresh if verification was completed
+                                      if (result == true) {
+                                        setState(() {});
+                                      }
+                                    },
+                                    icon: const Icon(Icons.verified_outlined,
+                                        size: 18),
+                                    label: const Text('Verify & Rate'),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: const Color(0xFF176A21),
+                                      side: const BorderSide(
+                                          color: Color(0xFF176A21)),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8),
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                         );
@@ -1007,13 +1045,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: TextButton(
-              onPressed: () {
-                AuthStore.instance.logout();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  (_) => false,
-                );
+              onPressed: () async {
+                await SupabaseService.instance.signOut();
+                if (mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (_) => false,
+                  );
+                }
               },
               child: const Text(
                 'Sign Out',

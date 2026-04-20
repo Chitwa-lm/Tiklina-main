@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 
 class VerificationScreen extends StatefulWidget {
+  final Map<String, dynamic> job;
   final bool embedded;
-  const VerificationScreen({super.key, this.embedded = false});
+
+  const VerificationScreen({
+    super.key,
+    required this.job,
+    this.embedded = false,
+  });
 
   @override
   State<VerificationScreen> createState() => _VerificationScreenState();
@@ -11,6 +17,58 @@ class VerificationScreen extends StatefulWidget {
 class _VerificationScreenState extends State<VerificationScreen> {
   int _rating = 4;
   final _commentController = TextEditingController();
+  bool _isSubmitting = false;
+
+  Future<void> _submitVerification() async {
+    setState(() => _isSubmitting = true);
+
+    try {
+      // Here you would typically create a verification record
+      // For now, we'll just show success message
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF2C2F30),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            behavior: SnackBarBehavior.floating,
+            content: const Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Color(0xFF9DF197),
+                  size: 20,
+                ),
+                SizedBox(width: 12),
+                Text(
+                  'Verification submitted successfully',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        Navigator.pop(
+            context, true); // Return true to indicate verification completed
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to submit verification: $e'),
+            backgroundColor: const Color(0xFFB02500),
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isSubmitting = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -275,35 +333,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                 ],
               ),
               child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: const Color(0xFF2C2F30),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                      content: const Row(
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            color: Color(0xFF9DF197),
-                            size: 20,
-                          ),
-                          SizedBox(width: 12),
-                          Text(
-                            'Verification submitted successfully',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                  Navigator.pop(context);
-                },
+                onPressed: _isSubmitting ? null : _submitVerification,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
@@ -311,22 +341,26 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      'Submit Verification',
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                child: _isSubmitting
+                    ? const CircularProgressIndicator(
                         color: Color(0xFFD1FFC8),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text(
+                            'Submit Verification',
+                            style: TextStyle(
+                              fontFamily: 'Manrope',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Color(0xFFD1FFC8),
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Icon(Icons.send, color: Color(0xFFD1FFC8)),
+                        ],
                       ),
-                    ),
-                    SizedBox(width: 12),
-                    Icon(Icons.send, color: Color(0xFFD1FFC8)),
-                  ],
-                ),
               ),
             ),
             const SizedBox(height: 16),
