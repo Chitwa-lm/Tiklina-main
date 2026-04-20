@@ -1,9 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
-import 'package:tiklini/services/job_store.dart';
 import 'package:tiklini/services/auth_store.dart';
+import 'package:tiklini/services/database_service.dart';
 import 'package:tiklini/screens/auth/login_screen.dart';
 import 'package:tiklini/screens/admin/report_waste_screen.dart';
 
@@ -249,7 +248,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ],
       ),
-      actions: const [],
     );
   }
 
@@ -279,7 +277,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             children: [
               _buildNavItem(0, 'Home', Icons.grid_view),
               _buildNavItem(1, 'Report', Icons.photo_camera_outlined),
-              _buildNavItem(2, 'History', Icons.bar_chart_outlined),
+              _buildNavItem(2, 'Reports', Icons.receipt_long_outlined),
               _buildNavItem(3, 'Profile', Icons.person_outline),
             ],
           ),
@@ -332,188 +330,82 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ── Home Tab ──────────────────────────────────────────────────────────────
 
   Widget _buildHomeTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 120),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Hello, $_marketName',
-            style: const TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w800,
-              fontSize: 28,
-              letterSpacing: -0.5,
-              color: Color(0xFF2C2F30),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              const Icon(Icons.location_on, size: 16, color: Color(0xFF595C5D)),
-              const SizedBox(width: 4),
-              Text(
-                _location.isEmpty ? 'No location set' : _location,
-                style: const TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 14,
-                  color: Color(0xFF595C5D),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: DatabaseService.instance.getAllWasteReports(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          // Active Reports section
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Text(
-                    'Active Reports',
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Color(0xFF2C2F30),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (_reports.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF176A21).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${_reports.length}',
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                          color: Color(0xFF176A21),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              TextButton(
-                onPressed: () => setState(() => _selectedIndex = 2),
-                child: const Text(
-                  'View All',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Color(0xFF176A21),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          if (_reports.isEmpty)
-            _buildEmptyState(
-              icon: Icons.inbox_outlined,
-              title: 'No reports yet',
-              subtitle:
-                  'Tap "Report Waste" below to submit your first waste report.',
-            )
-          else
-            ..._reports.map(
-              (r) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: _buildReportCard(
-                  title: r['location'] ?? 'Unknown location',
-                  status: 'Pending',
-                  statusColor: const Color(0xFF6E3A00),
-                  statusBgColor: const Color(0xFFFFC698),
-                  date: r['date'] ?? '',
-                  category: r['category'] ?? '',
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  // ── History Tab ───────────────────────────────────────────────────────────
-
-  Widget _buildHistoryTab() {
-    return Consumer<JobStore>(
-      builder: (context, store, _) {
-        final jobs = store.jobs;
-        final total = jobs.length;
-        final completed = jobs
-            .where((j) => j.status == JobStatus.completed)
+        final reports = snapshot.data ?? [];
+        final pending = reports.where((r) => r['status'] == 'Submitted').length;
+        final accepted = reports
+            .where((r) =>
+                r['status'] == 'In Progress' || r['status'] == 'Accepted')
             .length;
-        final accepted = jobs
-            .where((j) => j.status == JobStatus.accepted)
-            .length;
-        final pending = jobs.where((j) => j.status == JobStatus.pending).length;
-
-        final volumeMap = {
-          'Small Bag': 5,
-          'Car Trunk': 30,
-          'Pickup': 80,
-          'Truck Load': 200,
-          'Multiple': 400,
-        };
-        final totalKg = jobs
-            .where((j) => j.status == JobStatus.completed)
-            .fold<int>(0, (sum, j) => sum + (volumeMap[j.volume] ?? 0));
+        final completed =
+            reports.where((r) => r['status'] == 'Completed').length;
+        final recentReports = reports.take(3).toList();
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 20,
-            bottom: 120,
-          ),
+          padding:
+              const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 120),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'History & Analytics',
-                style: TextStyle(
+              Text(
+                'Hello, $_marketName',
+                style: const TextStyle(
                   fontFamily: 'Manrope',
                   fontWeight: FontWeight.w800,
                   fontSize: 28,
+                  letterSpacing: -0.5,
                   color: Color(0xFF2C2F30),
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                'Overview of all your waste reports',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 14,
-                  color: Color(0xFF595C5D),
-                ),
+              Row(
+                children: [
+                  const Icon(Icons.location_on,
+                      size: 16, color: Color(0xFF595C5D)),
+                  const SizedBox(width: 4),
+                  Text(
+                    _location.isEmpty ? 'No location set' : _location,
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      color: Color(0xFF595C5D),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
 
+              // Quick Stats - Compact single row
               Row(
                 children: [
                   Expanded(
-                    child: _buildStatCard(
-                      label: 'Total Reports',
-                      value: '$total',
-                      icon: Icons.receipt_long_outlined,
-                      color: const Color(0xFF176A21),
-                      bgColor: const Color(0xFF9DF197).withValues(alpha: 0.3),
+                    child: _buildCompactStatCard(
+                      label: 'Pending',
+                      value: '$pending',
+                      icon: Icons.hourglass_empty_outlined,
+                      color: const Color(0xFF6E3A00),
+                      bgColor: const Color(0xFFFFC698).withValues(alpha: 0.4),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: _buildStatCard(
+                    child: _buildCompactStatCard(
+                      label: 'In Progress',
+                      value: '$accepted',
+                      icon: Icons.local_shipping_outlined,
+                      color: const Color(0xFF005159),
+                      bgColor: const Color(0xFF10EAFE).withValues(alpha: 0.2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildCompactStatCard(
                       label: 'Completed',
                       value: '$completed',
                       icon: Icons.check_circle_outline,
@@ -523,45 +415,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      label: 'In Progress',
-                      value: '$accepted',
-                      icon: Icons.local_shipping_outlined,
-                      color: const Color(0xFF005159),
-                      bgColor: const Color(0xFF10EAFE).withValues(alpha: 0.2),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatCard(
-                      label: 'Pending',
-                      value: '$pending',
-                      icon: Icons.hourglass_empty_outlined,
-                      color: const Color(0xFF6E3A00),
-                      bgColor: const Color(0xFFFFC698).withValues(alpha: 0.4),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _buildStatCard(
-                label: 'Est. Waste Collected',
-                value: totalKg > 0 ? '~${totalKg}kg' : '0kg',
-                icon: Icons.delete_sweep_outlined,
-                color: const Color(0xFF00656F),
-                bgColor: const Color(0xFF10EAFE).withValues(alpha: 0.15),
-              ),
 
               const SizedBox(height: 32),
+
+              // Recent Reports section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'All Reports',
+                    'Recent Reports',
                     style: TextStyle(
                       fontFamily: 'Manrope',
                       fontWeight: FontWeight.bold,
@@ -569,149 +431,64 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       color: Color(0xFF2C2F30),
                     ),
                   ),
-                  if (total > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF176A21).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '$total total',
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: Color(0xFF176A21),
-                        ),
+                  TextButton(
+                    onPressed: () => setState(() => _selectedIndex = 2),
+                    child: const Text(
+                      'View All',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: Color(0xFF176A21),
                       ),
                     ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
 
-              if (jobs.isEmpty)
+              if (recentReports.isEmpty)
                 _buildEmptyState(
-                  icon: Icons.bar_chart_outlined,
+                  icon: Icons.inbox_outlined,
                   title: 'No reports yet',
                   subtitle:
-                      'Your submitted reports and live status will appear here.',
+                      'Tap "Report Waste" below to submit your first waste report.',
                 )
               else
-                ...jobs.map(
-                  (job) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(
-                              0xFF2C2F30,
-                            ).withValues(alpha: 0.04),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                ...recentReports.map(
+                  (report) {
+                    final status = report['status'] as String;
+                    final statusLabel =
+                        status == 'Submitted' ? 'Pending' : status;
+                    final statusColor = status == 'Submitted'
+                        ? const Color(0xFF6E3A00)
+                        : status == 'Completed'
+                            ? const Color(0xFF005159)
+                            : const Color(0xFF005C15);
+                    final statusBgColor = status == 'Submitted'
+                        ? const Color(0xFFFFC698)
+                        : status == 'Completed'
+                            ? const Color(0xFF10EAFE)
+                            : const Color(0xFF9DF197);
+
+                    final reportDate =
+                        DateTime.parse(report['reported_at'] as String);
+                    final date =
+                        '${reportDate.day} ${_monthName(reportDate.month)} ${reportDate.year}';
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _buildReportCard(
+                        title: report['market_name'] as String? ??
+                            'Unknown location',
+                        status: statusLabel,
+                        statusColor: statusColor,
+                        statusBgColor: statusBgColor,
+                        date: date,
+                        category: 'Mixed Waste',
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 52,
-                            height: 52,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEFF1F2),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: const Icon(
-                              Icons.delete_outline,
-                              color: Color(0xFFABACAE),
-                              size: 26,
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  job.location,
-                                  style: const TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                    color: Color(0xFF2C2F30),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Text(
-                                      job.category,
-                                      style: const TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 12,
-                                        color: Color(0xFF595C5D),
-                                      ),
-                                    ),
-                                    if (job.volume.isNotEmpty) ...[
-                                      const Text(
-                                        ' · ',
-                                        style: TextStyle(
-                                          color: Color(0xFFABACAE),
-                                        ),
-                                      ),
-                                      Text(
-                                        job.volume,
-                                        style: const TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontSize: 12,
-                                          color: Color(0xFF595C5D),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  job.date,
-                                  style: const TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 11,
-                                    color: Color(0xFFABACAE),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: job.statusBgColor,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              job.statusLabel.toUpperCase(),
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                                color: job.statusColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
             ],
           ),
@@ -720,7 +497,221 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildStatCard({
+  // ── All Reports Tab ───────────────────────────────────────────────────────
+
+  Widget _buildHistoryTab() {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: DatabaseService.instance.getAllWasteReports(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final reports = snapshot.data ?? [];
+        final total = reports.length;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'All Reports',
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontWeight: FontWeight.w800,
+                      fontSize: 28,
+                      color: Color(0xFF2C2F30),
+                    ),
+                  ),
+                  if (total > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF176A21).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        '$total total',
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: Color(0xFF176A21),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'Track the status of all your waste reports',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 14,
+                  color: Color(0xFF595C5D),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: reports.isEmpty
+                  ? _buildEmptyState(
+                      icon: Icons.receipt_long_outlined,
+                      title: 'No reports yet',
+                      subtitle:
+                          'Your submitted reports and their status will appear here.',
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
+                      itemCount: reports.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, i) {
+                        final report = reports[i];
+                        final status = report['status'] as String;
+                        final statusLabel =
+                            status == 'Submitted' ? 'Pending' : status;
+                        final statusColor = status == 'Submitted'
+                            ? const Color(0xFF6E3A00)
+                            : status == 'Completed'
+                                ? const Color(0xFF005159)
+                                : const Color(0xFF005C15);
+                        final statusBgColor = status == 'Submitted'
+                            ? const Color(0xFFFFC698)
+                            : status == 'Completed'
+                                ? const Color(0xFF10EAFE)
+                                : const Color(0xFF9DF197);
+
+                        final reportDate =
+                            DateTime.parse(report['reported_at'] as String);
+                        final date =
+                            '${reportDate.day} ${_monthName(reportDate.month)} ${reportDate.year}';
+
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(
+                                  0xFF2C2F30,
+                                ).withValues(alpha: 0.04),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 52,
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEFF1F2),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: const Icon(
+                                  Icons.delete_outline,
+                                  color: Color(0xFFABACAE),
+                                  size: 26,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      report['market_name'] as String? ??
+                                          'Unknown location',
+                                      style: const TextStyle(
+                                        fontFamily: 'Manrope',
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                        color: Color(0xFF2C2F30),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Text(
+                                          'Mixed Waste',
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 12,
+                                            color: Color(0xFF595C5D),
+                                          ),
+                                        ),
+                                        const Text(
+                                          ' · ',
+                                          style: TextStyle(
+                                            color: Color(0xFFABACAE),
+                                          ),
+                                        ),
+                                        Text(
+                                          report['est_volume'] as String? ??
+                                              'Unknown',
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 12,
+                                            color: Color(0xFF595C5D),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      date,
+                                      style: const TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 11,
+                                        color: Color(0xFFABACAE),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: statusBgColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  statusLabel.toUpperCase(),
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                    color: statusColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildCompactStatCard({
     required String label,
     required String value,
     required IconData icon,
@@ -728,22 +719,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     required Color bgColor,
   }) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 12),
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
               fontFamily: 'Manrope',
               fontWeight: FontWeight.w800,
-              fontSize: 28,
+              fontSize: 20,
               color: color,
             ),
           ),
@@ -753,13 +744,32 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             style: const TextStyle(
               fontFamily: 'Inter',
               fontWeight: FontWeight.w600,
-              fontSize: 12,
+              fontSize: 10,
               color: Color(0xFF595C5D),
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _monthName(int month) {
+    const months = [
+      '',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return months[month];
   }
 
   // ── Profile Tab ───────────────────────────────────────────────────────────

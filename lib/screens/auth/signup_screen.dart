@@ -2,6 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tiklini/services/auth_store.dart';
+import 'package:tiklini/services/supabase_service.dart';
+import 'package:tiklini/services/database_service.dart';
+import 'package:tiklini/services/cloudinary_service.dart';
 import 'login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -144,7 +147,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  void _register() {
+  void _register() async {
     final name = _nameController.text.trim();
     final location = _locationController.text.trim();
     final email = _emailController.text.trim();
@@ -170,33 +173,66 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     setState(() => _isLoading = true);
 
-    final error = AuthStore.instance.register(
-      AppUser(
+    try {
+      // 1. Sign up with Supabase
+      final authResponse = await SupabaseService.instance.signUp(
         email: email,
         password: password,
-        role: _selectedRole!,
-        name: name,
+        metadata: {
+          'role': _selectedRole == UserRole.admin ? 'Admin' : 'Company',
+          'name': name,
+        },
+      );
+
+      if (authResponse.user == null) {
+        throw Exception('Failed to create account');
+      }
+
+      final userId = authResponse.user!.id;
+
+      // 2. Upload market image to Cloudinary if provided
+      String? imageUrl;
+      if (_marketImage != null) {
+        try {
+          imageUrl = await CloudinaryService.instance.uploadImage(
+            imageFile: _marketImage!,
+            folder: 'market_photos',
+          );
+        } catch (e) {
+          // Image upload failed - continue without image
+        }
+      }
+
+      // 3. Create user profile in database
+      await DatabaseService.instance.upsertUserProfile(
+        userId: userId,
+        role: _selectedRole == UserRole.admin ? 'Admin' : 'Company',
+        phone: '', // Can be added later
+        email: email,
+        companyName: _selectedRole == UserRole.collector ? name : null,
+        marketName: _selectedRole == UserRole.admin ? name : null,
         location: location,
-        marketImage: _marketImage,
-      ),
-    );
-
-    setState(() => _isLoading = false);
-
-    if (error != null) {
-      _err(error);
-    } else {
-      // Registration successful — go to login
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account created! Please log in.'),
-          backgroundColor: Color(0xFF176A21),
-        ),
+        contactInfo: imageUrl, // Store image URL in contact_info for now
       );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+
+      setState(() => _isLoading = false);
+
+      // Registration successful
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account created successfully! Please log in.'),
+            backgroundColor: Color(0xFF176A21),
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _err('Registration failed: ${e.toString()}');
     }
   }
 
@@ -672,15 +708,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _label(String text) => Text(
-    text,
-    style: const TextStyle(
-      fontFamily: 'Manrope',
-      fontWeight: FontWeight.bold,
-      fontSize: 12,
-      letterSpacing: 1.5,
-      color: Color(0xFF595C5D),
-    ),
-  );
+        text,
+        style: const TextStyle(
+          fontFamily: 'Manrope',
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+          letterSpacing: 1.5,
+          color: Color(0xFF595C5D),
+        ),
+      );
 
   Widget _field(
     TextEditingController controller, {

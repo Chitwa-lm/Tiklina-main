@@ -1,5 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:tiklini/services/job_store.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:tiklini/services/database_service.dart';
+import 'package:tiklini/services/cloudinary_service.dart';
+import 'package:tiklini/services/supabase_service.dart';
 
 class ReportWasteScreen extends StatefulWidget {
   final bool embedded;
@@ -20,6 +25,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
   final _descController = TextEditingController();
   final _locationController = TextEditingController();
   String _selectedCategory = 'Mixed Waste';
+  final List<File> _capturedImages = [];
+  bool _isSubmitting = false;
+  Position? _currentPosition;
 
   static const _categories = [
     'Mixed Waste',
@@ -38,6 +46,149 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
     'Truck Load',
     'Multiple',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        _currentPosition = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+          ),
+        );
+      }
+    } catch (e) {
+      // Error getting location - will use default coordinates
+    }
+  }
+
+  Future<void> _takePhoto() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? photo = await picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+
+      if (photo != null && mounted) {
+        setState(() {
+          _capturedImages.add(File(photo.path));
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to take photo: $e'),
+            backgroundColor: const Color(0xFFB02500),
+          ),
+        );
+      }
+    }
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      _capturedImages.removeAt(index);
+    });
+  }
+
+  Future<void> _submitReport() async {
+    if (_capturedImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please take at least one photo'),
+          backgroundColor: Color(0xFFB02500),
+        ),
+      );
+      return;
+    }
+
+    if (_locationController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a location'),
+          backgroundColor: Color(0xFFB02500),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      final userId = SupabaseService.instance.currentUserId;
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
+      // Upload images to Cloudinary
+      final imageUrls = await CloudinaryService.instance.uploadMultipleImages(
+        imageFiles: _capturedImages,
+        folder: 'waste_reports',
+      );
+
+      // Create waste report in database
+      await DatabaseService.instance.createWasteReport(
+        reporterId: userId,
+        marketName: _locationController.text.trim(),
+        locationLat: _currentPosition?.latitude ?? 0.0,
+        locationLng: _currentPosition?.longitude ?? 0.0,
+        description: _descController.text.trim().isEmpty
+            ? 'No description provided'
+            : _descController.text.trim(),
+        estVolume: _volumeLabels[_volumeValue.toInt()],
+        photoUrls: imageUrls,
+      );
+
+      setState(() => _isSubmitting = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Report submitted successfully!'),
+            backgroundColor: Color(0xFF176A21),
+          ),
+        );
+
+        // Clear form
+        setState(() {
+          _capturedImages.clear();
+          _descController.clear();
+          _locationController.clear();
+          _selectedCategory = 'Mixed Waste';
+          _volumeValue = 3;
+        });
+
+        if (!widget.embedded) {
+          Navigator.pop(context);
+        }
+      }
+    } catch (e) {
+      setState(() => _isSubmitting = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to submit report: $e'),
+            backgroundColor: const Color(0xFFB02500),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,76 +254,144 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFFABACAE),
-                      width: 2,
-                      style: BorderStyle.none,
-                    ),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {},
+                if (_capturedImages.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: CustomPaint(
-                          painter: DashedRectPainter(
-                            color: const Color(0xFFABACAE),
-                            strokeWidth: 2,
-                            gap: 5,
+                      border: Border.all(
+                        color: const Color(0xFFABACAE),
+                        width: 2,
+                        style: BorderStyle.none,
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _takePhoto,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 64,
-                                height: 64,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF9DF197),
-                                  shape: BoxShape.circle,
+                          child: CustomPaint(
+                            painter: DashedRectPainter(
+                              color: const Color(0xFFABACAE),
+                              strokeWidth: 2,
+                              gap: 5,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 64,
+                                  height: 64,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF9DF197),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.photo_camera,
+                                    size: 32,
+                                    color: Color(0xFF005C15),
+                                  ),
                                 ),
-                                child: const Icon(
-                                  Icons.photo_camera,
-                                  size: 32,
-                                  color: Color(0xFF005C15),
+                                const SizedBox(height: 12),
+                                const Text(
+                                  'Tap to take a photo',
+                                  style: TextStyle(
+                                    fontFamily: 'Manrope',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Color(0xFF2C2F30),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                'Tap to take a photo',
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Color(0xFF2C2F30),
+                                const SizedBox(height: 4),
+                                const Text(
+                                  'JPEG or PNG up to 10MB',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 12,
+                                    color: Color(0xFF595C5D),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'JPEG or PNG up to 10MB',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                  color: Color(0xFF595C5D),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
+                  )
+                else
+                  Column(
+                    children: [
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
+                        itemCount: _capturedImages.length,
+                        itemBuilder: (context, index) {
+                          return Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  _capturedImages[index],
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () => _removeImage(index),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFB02500),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: OutlinedButton.icon(
+                          onPressed: _takePhoto,
+                          icon: const Icon(Icons.add_a_photo),
+                          label: const Text('Add Another Photo'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF176A21),
+                            side: const BorderSide(color: Color(0xFF176A21)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
 
                 const SizedBox(height: 24),
 
@@ -442,52 +661,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
                   ],
                 ),
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_locationController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please enter the incident location.'),
-                        ),
-                      );
-                      return;
-                    }
-                    final now = DateTime.now();
-                    final date =
-                        '${now.day} ${_monthName(now.month)} ${now.year}';
-                    final reportData = {
-                      'location': _locationController.text.trim(),
-                      'description': _descController.text.trim(),
-                      'category': _selectedCategory,
-                      'volume': _volumeLabels[(_volumeValue - 1).toInt()],
-                      'date': date,
-                    };
-                    widget.onReportSubmitted?.call(reportData);
-                    // Publish to shared store so collectors can see it
-                    JobStore.instance.addJob(
-                      Job(
-                        id: '${now.millisecondsSinceEpoch}',
-                        marketName: '',
-                        location: _locationController.text.trim(),
-                        category: _selectedCategory,
-                        volume: _volumeLabels[(_volumeValue - 1).toInt()],
-                        description: _descController.text.trim(),
-                        date: date,
-                      ),
-                    );
-                    if (widget.embedded) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Report submitted successfully.'),
-                          backgroundColor: Color(0xFF176A21),
-                        ),
-                      );
-                      _locationController.clear();
-                      _descController.clear();
-                      setState(() => _volumeValue = 3);
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
+                  onPressed: _isSubmitting ? null : _submitReport,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
@@ -495,22 +669,32 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        'Submit',
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                          color: Color(0xFFD1FFC8), // on-primary
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Color(0xFFD1FFC8),
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Text(
+                              'Submit',
+                              style: TextStyle(
+                                fontFamily: 'Manrope',
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
+                                color: Color(0xFFD1FFC8),
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Icon(Icons.send,
+                                color: Color(0xFFD1FFC8), size: 20),
+                          ],
                         ),
-                      ),
-                      SizedBox(width: 12),
-                      Icon(Icons.send, color: Color(0xFFD1FFC8), size: 20),
-                    ],
-                  ),
                 ),
               ),
             ),
@@ -519,25 +703,6 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> {
       ),
     );
   }
-}
-
-String _monthName(int month) {
-  const months = [
-    '',
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return months[month];
 }
 
 // Dashed Rectangle Painter

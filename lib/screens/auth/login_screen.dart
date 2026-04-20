@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tiklini/services/auth_store.dart';
+import 'package:tiklini/services/supabase_service.dart';
+import 'package:tiklini/services/database_service.dart';
 import 'package:tiklini/screens/admin/admin_dashboard_screen.dart';
 import 'package:tiklini/screens/company/company_dashboard_screen.dart';
 import 'signup_screen.dart';
@@ -24,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
+  void _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
@@ -39,40 +40,64 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
 
-    final error = AuthStore.instance.login(email, password);
-
-    setState(() => _isLoading = false);
-
-    if (error != null) {
-      _err(error);
-      return;
-    }
-
-    final user = AuthStore.instance.currentUser!;
-
-    if (user.role == UserRole.admin) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => AdminDashboardScreen(
-            marketName: user.name,
-            location: user.location,
-            marketImage: user.marketImage,
-          ),
-        ),
-        (_) => false,
+    try {
+      // 1. Sign in with Supabase
+      final authResponse = await SupabaseService.instance.signIn(
+        email: email,
+        password: password,
       );
-    } else {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (_) => CompanyDashboardScreen(
-            companyName: user.name,
-            location: user.location,
-          ),
-        ),
-        (_) => false,
-      );
+
+      if (authResponse.user == null) {
+        throw Exception('Login failed');
+      }
+
+      final userId = authResponse.user!.id;
+
+      // 2. Get user profile from database
+      final profile = await DatabaseService.instance.getUserProfile(userId);
+
+      if (profile == null) {
+        throw Exception('User profile not found');
+      }
+
+      final role = profile['role'] as String;
+      final name = profile['market_name'] ?? profile['company_name'] ?? 'User';
+      final location = profile['location'] ?? '';
+
+      setState(() => _isLoading = false);
+
+      // 3. Navigate based on role
+      if (mounted) {
+        if (role == 'Admin') {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (_) => AdminDashboardScreen(
+                marketName: name,
+                location: location,
+                marketImage: null, // Can be loaded from profile if needed
+              ),
+            ),
+            (_) => false,
+          );
+        } else if (role == 'Company') {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CompanyDashboardScreen(
+                companyName: name,
+                location: location,
+              ),
+            ),
+            (_) => false,
+          );
+        } else {
+          throw Exception('Invalid user role: $role');
+        }
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _err('Login failed: ${e.toString()}');
     }
   }
 
@@ -257,18 +282,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _label(String text) => Align(
-    alignment: Alignment.centerLeft,
-    child: Text(
-      text,
-      style: const TextStyle(
-        fontFamily: 'Manrope',
-        fontWeight: FontWeight.bold,
-        fontSize: 12,
-        letterSpacing: 1.5,
-        color: Color(0xFF595C5D),
-      ),
-    ),
-  );
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontFamily: 'Manrope',
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+            letterSpacing: 1.5,
+            color: Color(0xFF595C5D),
+          ),
+        ),
+      );
 
   Widget _field(
     TextEditingController controller, {

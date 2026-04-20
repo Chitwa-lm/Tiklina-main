@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS waste_reports (
   location_lng DOUBLE PRECISION NOT NULL,
   description TEXT NOT NULL,
   est_volume TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'Submitted' CHECK (status IN ('Submitted', 'Acknowledged', 'Scheduled', 'Resolved')),
+  status TEXT NOT NULL DEFAULT 'Submitted' CHECK (status IN ('Submitted', 'Accepted', 'In Progress', 'Completed')),
   reported_at TIMESTAMPTZ DEFAULT NOW()
 );
 

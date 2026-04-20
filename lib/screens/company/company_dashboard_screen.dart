@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tiklini/services/job_store.dart';
+import 'package:tiklini/services/database_service.dart';
 import 'package:tiklini/services/auth_store.dart';
 import 'package:tiklini/screens/auth/login_screen.dart';
 import 'package:tiklini/screens/company/job_execution_screen.dart';
-import 'package:tiklini/screens/company/job_details_screen.dart';
 
 class CompanyDashboardScreen extends StatefulWidget {
   final String companyName;
@@ -21,16 +19,106 @@ class CompanyDashboardScreen extends StatefulWidget {
 }
 
 class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
 
   late String _companyName;
   late String _location;
+
+  // Reports loaded from database
+  List<Map<String, dynamic>> _availableReports = [];
+  List<Map<String, dynamic>> _acceptedReports = [];
+  bool _isLoadingReports = false;
 
   @override
   void initState() {
     super.initState();
     _companyName = widget.companyName;
     _location = widget.location;
+    _loadReports();
+  }
+
+  Future<void> _loadReports() async {
+    setState(() => _isLoadingReports = true);
+    try {
+      final allReports = await DatabaseService.instance.getAllWasteReports();
+
+      setState(() {
+        _availableReports =
+            allReports.where((r) => r['status'] == 'Submitted').toList();
+        _acceptedReports = allReports
+            .where((r) =>
+                r['status'] == 'In Progress' ||
+                r['status'] == 'Accepted' ||
+                r['status'] == 'Completed')
+            .toList();
+        _isLoadingReports = false;
+      });
+
+      // Debug: Print report counts (temporarily enabled)
+      print('Total reports: ${allReports.length}');
+      print('Available reports: ${_availableReports.length}');
+      print('Accepted reports: ${_acceptedReports.length}');
+      if (_availableReports.isNotEmpty) {
+        print('First available report: ${_availableReports.first}');
+      }
+    } catch (e) {
+      print('Error loading reports: $e');
+      setState(() => _isLoadingReports = false);
+    }
+  }
+
+  Future<void> _acceptJob(String reportId) async {
+    try {
+      await DatabaseService.instance.updateWasteReportStatus(
+        reportId: reportId,
+        status: 'Accepted',
+      );
+      await _loadReports();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Job accepted!'),
+            backgroundColor: Color(0xFF176A21),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to accept job: $e'),
+            backgroundColor: Color(0xFFB02500),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _markAsCompleted(String reportId) async {
+    try {
+      await DatabaseService.instance.updateWasteReportStatus(
+        reportId: reportId,
+        status: 'Completed',
+      );
+      await _loadReports();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Job marked as completed!'),
+            backgroundColor: Color(0xFF176A21),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update status: $e'),
+            backgroundColor: Color(0xFFB02500),
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildBody() {
@@ -79,27 +167,6 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications, color: Color(0xFF595C5D)),
-          onPressed: () {},
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 24.0, left: 8.0),
-          child: GestureDetector(
-            onTap: () => setState(() => _selectedIndex = 3),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: Color(0xFF9DF197),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.person, color: Color(0xFF005C15)),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -180,248 +247,198 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
   // ── Home Tab ──────────────────────────────────────────────────────────────
 
   Widget _buildHomeTab() {
-    return Consumer<JobStore>(
-      builder: (context, store, _) {
-        final availableCount = store.availableJobs.length;
-        final completedToday =
-            store.jobs.where((j) => j.status == JobStatus.completed).length;
-        final recentJobs = store.jobs.take(2).toList();
+    final availableCount = _availableReports.length;
+    final inProgressReports = _acceptedReports
+        .where((r) => r['status'] == 'Accepted' || r['status'] == 'In Progress')
+        .toList();
+    final completedReports =
+        _acceptedReports.where((r) => r['status'] == 'Completed').toList();
+    final inProgressCount = inProgressReports.length;
+    final completedCount = completedReports.length;
+    final totalJobs = inProgressCount + completedCount;
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final efficiency = totalJobs > 0
+        ? ((completedCount / totalJobs) * 100).toStringAsFixed(0)
+        : '0';
+
+    final earnings = completedCount * 50;
+
+    final volumeMap = {
+      'Small Bag': 5,
+      'Car Trunk': 30,
+      'Pickup': 80,
+      'Truck Load': 200,
+      'Multiple': 400,
+    };
+    final totalKg = completedReports.fold<int>(
+      0,
+      (sum, r) {
+        final volume = r['est_volume'] as String? ?? '';
+        return sum + (volumeMap[volume] ?? 0);
+      },
+    );
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Good morning,',
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w800,
+              fontSize: 32,
+              letterSpacing: -0.5,
+              color: Color(0xFF2C2F30),
+            ),
+          ),
+          Text(
+            _companyName,
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w800,
+              fontSize: 32,
+              letterSpacing: -0.5,
+              color: Color(0xFF176A21),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
             children: [
-              const Text(
-                'Good morning,',
-                style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontWeight: FontWeight.w800,
-                  fontSize: 32,
-                  letterSpacing: -0.5,
-                  color: Color(0xFF2C2F30),
+              Expanded(
+                child: _buildAnalyticsCard(
+                  label: 'Available',
+                  value: '$availableCount',
+                  icon: Icons.map_outlined,
+                  color: const Color(0xFF176A21),
+                  bgColor: const Color(0xFF9DF197).withValues(alpha: 0.3),
                 ),
               ),
-              Text(
-                _companyName,
-                style: const TextStyle(
-                  fontFamily: 'Manrope',
-                  fontWeight: FontWeight.w800,
-                  fontSize: 32,
-                  letterSpacing: -0.5,
-                  color: Color(0xFF176A21),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildStatItem('$availableCount', 'Jobs\nAvailable'),
-                    _buildDivider(),
-                    _buildStatItem('$completedToday', 'Completed\nToday'),
-                    _buildDivider(),
-                    _buildStatItem('--', 'Efficiency\nRate'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Recent Jobs',
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Color(0xFF2C2F30),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => setState(() => _selectedIndex = 2),
-                    child: const Text(
-                      'View All',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: Color(0xFF176A21),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (recentJobs.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF1F2),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Icons.inbox_outlined,
-                            color: Color(0xFFABACAE),
-                            size: 30,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'No recent jobs',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 14,
-                            color: Color(0xFF595C5D),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                ...recentJobs.map(
-                  (job) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _buildRecentJobTile(
-                      job.location,
-                      job.statusLabel,
-                      job.statusBgColor,
-                      job.statusColor,
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton.icon(
-                  onPressed: () => setState(() => _selectedIndex = 1),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF176A21),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                  ),
-                  icon: const Icon(Icons.map, color: Color(0xFFD1FFC8)),
-                  label: const Text(
-                    'Find Nearby Jobs',
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Color(0xFFD1FFC8),
-                    ),
-                  ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildAnalyticsCard(
+                  label: 'In Progress',
+                  value: '$inProgressCount',
+                  icon: Icons.local_shipping_outlined,
+                  color: const Color(0xFF005159),
+                  bgColor: const Color(0xFF10EAFE).withValues(alpha: 0.2),
                 ),
               ),
             ],
           ),
-        );
-      },
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildAnalyticsCard(
+                  label: 'Completed',
+                  value: '$completedCount',
+                  icon: Icons.check_circle_outline,
+                  color: const Color(0xFF005C15),
+                  bgColor: const Color(0xFF9DF197).withValues(alpha: 0.5),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildAnalyticsCard(
+                  label: 'Efficiency',
+                  value: '$efficiency%',
+                  icon: Icons.trending_up,
+                  color: const Color(0xFF6E3A00),
+                  bgColor: const Color(0xFFFFC698).withValues(alpha: 0.4),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildAnalyticsCard(
+                  label: 'Waste Collected',
+                  value: '${totalKg}kg',
+                  icon: Icons.delete_sweep_outlined,
+                  color: const Color(0xFF00656F),
+                  bgColor: const Color(0xFF10EAFE).withValues(alpha: 0.15),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildAnalyticsCard(
+                  label: 'Earnings',
+                  value: '\$$earnings',
+                  icon: Icons.attach_money,
+                  color: const Color(0xFF176A21),
+                  bgColor: const Color(0xFF9DF197).withValues(alpha: 0.3),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton.icon(
+              onPressed: () => setState(() => _selectedIndex = 1),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF176A21),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
+              ),
+              icon: const Icon(Icons.map, color: Color(0xFFD1FFC8)),
+              label: const Text(
+                'Browse Available Jobs',
+                style: TextStyle(
+                  fontFamily: 'Manrope',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Color(0xFFD1FFC8),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontFamily: 'Manrope',
-            fontWeight: FontWeight.w800,
-            fontSize: 28,
-            color: Color(0xFF176A21),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 12,
-            color: Color(0xFF595C5D),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDivider() {
-    return Container(width: 1, height: 48, color: const Color(0xFFDADDDF));
-  }
-
-  Widget _buildRecentJobTile(
-    String title,
-    String status,
-    Color statusBg,
-    Color statusFg,
-  ) {
+  Widget _buildAnalyticsCard({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color color,
+    required Color bgColor,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: bgColor,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEFF1F2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.inventory_2_outlined,
-              color: Color(0xFFABACAE),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                color: Color(0xFF2C2F30),
-              ),
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w800,
+              fontSize: 24,
+              color: color,
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusBg,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              status,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.bold,
-                fontSize: 11,
-                color: statusFg,
-              ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+              color: Color(0xFF595C5D),
             ),
           ),
         ],
@@ -432,27 +449,26 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
   // ── Market Tab (Available Jobs from Admin) ───────────────────────────────
 
   Widget _buildMarketTab() {
-    return Consumer<JobStore>(
-      builder: (context, store, _) {
-        final available = store.availableJobs;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Available Jobs',
+                style: TextStyle(
+                  fontFamily: 'Manrope',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 28,
+                  color: Color(0xFF2C2F30),
+                ),
+              ),
+              Row(
                 children: [
-                  const Text(
-                    'Available Jobs',
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w800,
-                      fontSize: 28,
-                      color: Color(0xFF2C2F30),
-                    ),
-                  ),
-                  if (available.isNotEmpty)
+                  if (_availableReports.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -463,7 +479,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Text(
-                        '${available.length} open',
+                        '${_availableReports.length} open',
                         style: const TextStyle(
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w600,
@@ -472,200 +488,408 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                         ),
                       ),
                     ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: _loadReports,
+                    icon: const Icon(Icons.refresh),
+                    color: const Color(0xFF176A21),
+                    tooltip: 'Refresh',
+                  ),
                 ],
               ),
+            ],
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            'Waste reports from market admins',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 14,
+              color: Color(0xFF595C5D),
             ),
-            Expanded(
-              child: available.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: _isLoadingReports
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                  onRefresh: _loadReports,
+                  child: _availableReports.isEmpty
+                      ? ListView(
+                          padding: const EdgeInsets.all(32),
                           children: [
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEFF1F2),
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              child: const Icon(
-                                Icons.inbox_outlined,
-                                color: Color(0xFFABACAE),
-                                size: 40,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'No jobs available',
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: Color(0xFF2C2F30),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'When a market admin submits a waste report, it will appear here.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 14,
-                                color: Color(0xFF595C5D),
+                            Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 80,
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFEFF1F2),
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                    child: const Icon(
+                                      Icons.inbox_outlined,
+                                      color: Color(0xFFABACAE),
+                                      size: 40,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'No jobs available',
+                                    style: TextStyle(
+                                      fontFamily: 'Manrope',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: Color(0xFF2C2F30),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Debug: ${_availableReports.length} reports loaded. Loading: $_isLoadingReports',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 12,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Debug: ${_availableReports.length} reports loaded',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 12,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'When a market admin submits a waste report, it will appear here.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 14,
+                                      color: Color(0xFF595C5D),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  TextButton.icon(
+                                    onPressed: _loadReports,
+                                    icon: const Icon(Icons.refresh),
+                                    label: const Text('Refresh'),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: const Color(0xFF176A21),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
-                      itemCount: available.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 16),
-                      itemBuilder: (context, i) {
-                        final job = available[i];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => JobDetailsScreen(job: job),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
+                          itemCount: _availableReports.length,
+                          itemBuilder: (context, i) {
+                            final report = _availableReports[i];
+                            print(
+                                'Building item $i for report: ${report['market_name']}');
+
+                            // Safe parsing of date
+                            String date = 'Unknown date';
+                            try {
+                              final reportedAt = report['reported_at'];
+                              if (reportedAt != null) {
+                                final reportDate =
+                                    DateTime.parse(reportedAt.toString());
+                                date =
+                                    '${reportDate.day}/${reportDate.month}/${reportDate.year}';
+                              }
+                            } catch (e) {
+                              // print('Error parsing date: $e');
+                            }
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF2C2F30)
+                                        .withValues(alpha: 0.04),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(
-                                    0xFF2C2F30,
-                                  ).withValues(alpha: 0.04),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 56,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFEFF1F2),
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  child: const Icon(
-                                    Icons.delete_outline,
-                                    color: Color(0xFFABACAE),
-                                    size: 28,
-                                  ),
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
                                     children: [
-                                      Text(
-                                        job.location,
-                                        style: const TextStyle(
-                                          fontFamily: 'Manrope',
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                          color: Color(0xFF2C2F30),
+                                      Container(
+                                        width: 56,
+                                        height: 56,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFEFF1F2),
+                                          borderRadius:
+                                              BorderRadius.circular(14),
                                         ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '${job.category} · ${job.volume}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontSize: 13,
-                                          color: Color(0xFF595C5D),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        job.date,
-                                        style: const TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontSize: 11,
+                                        child: const Icon(
+                                          Icons.delete_outline,
                                           color: Color(0xFFABACAE),
+                                          size: 28,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              (report['market_name']
+                                                      as String?) ??
+                                                  'Unknown location',
+                                              style: const TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                color: Color(0xFF2C2F30),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              date,
+                                              style: const TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontSize: 12,
+                                                color: Color(0xFFABACAE),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                const Icon(
-                                  Icons.chevron_right,
-                                  color: Color(0xFFABACAE),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                                  const SizedBox(height: 16),
+                                  const Divider(color: Color(0xFFEFF1F2)),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      _buildJobDetail(
+                                        Icons.category_outlined,
+                                        'Category',
+                                        'Mixed Waste',
+                                      ),
+                                      const SizedBox(width: 20),
+                                      _buildJobDetail(
+                                        Icons.scale_outlined,
+                                        'Volume',
+                                        (report['est_volume'] as String?) ??
+                                            'Unknown',
+                                      ),
+                                    ],
+                                  ),
+                                  if ((report['description'] as String? ?? '')
+                                      .isNotEmpty) ...[
+                                    const SizedBox(height: 12),
+                                    _buildSingleJobDetail(
+                                      Icons.description_outlined,
+                                      'Description',
+                                      report['description'] as String,
+                                    ),
+                                  ],
+                                  const SizedBox(height: 16),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        final reportId = report['id'];
+                                        if (reportId != null) {
+                                          _acceptJob(reportId.toString());
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xFF176A21),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12),
+                                      ),
+                                      child: const Text(
+                                        'Accept Job',
+                                        style: TextStyle(
+                                          fontFamily: 'Manrope',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: Color(0xFFD1FFC8),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildJobDetail(IconData icon, String label, String value) {
+    return Flexible(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: const Color(0xFF176A21)),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF595C5D),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2C2F30),
+                  ),
+                ),
+              ],
             ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSingleJobDetail(IconData icon, String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: const Color(0xFF176A21)),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF595C5D),
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2C2F30),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   // ── Activity Tab (Accepted Jobs) ──────────────────────────────────────────
 
   Widget _buildActivityTab() {
-    return Consumer<JobStore>(
-      builder: (context, store, _) {
-        final active = store.acceptedJobs;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'My Jobs',
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w800,
-                      fontSize: 28,
-                      color: Color(0xFF2C2F30),
+    final activeReports =
+        _acceptedReports.where((r) => r['status'] != 'Completed').toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'My Jobs',
+                style: TextStyle(
+                  fontFamily: 'Manrope',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 28,
+                  color: Color(0xFF2C2F30),
+                ),
+              ),
+              if (activeReports.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10EAFE).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    '${activeReports.length} active',
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      color: Color(0xFF005159),
                     ),
                   ),
-                  if (active.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10EAFE).withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        '${active.length} active',
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                          color: Color(0xFF005159),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+                ),
+            ],
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            'Update job status as you progress',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 14,
+              color: Color(0xFF595C5D),
             ),
-            Expanded(
-              child: active.isEmpty
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: _isLoadingReports
+              ? const Center(child: CircularProgressIndicator())
+              : _acceptedReports.isEmpty
                   ? Center(
                       child: Padding(
                         padding: const EdgeInsets.all(32),
@@ -711,97 +935,187 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
-                      itemCount: active.length,
+                      itemCount: _acceptedReports.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 16),
                       itemBuilder: (context, i) {
-                        final job = active[i];
+                        final report = _acceptedReports[i];
+                        final status =
+                            (report['status'] as String?) ?? 'Unknown';
+                        final isCompleted = status == 'Completed';
+
                         return Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: const Color(0xFF9DF197),
+                              color: isCompleted
+                                  ? const Color(0xFF9DF197)
+                                  : const Color(0xFF10EAFE)
+                                      .withValues(alpha: 0.3),
                               width: 1.5,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(
-                                  0xFF2C2F30,
-                                ).withValues(alpha: 0.04),
+                                color: const Color(0xFF2C2F30)
+                                    .withValues(alpha: 0.04),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
                             ],
                           ),
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Container(
-                                width: 56,
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF9DF197,
-                                  ).withValues(alpha: 0.3),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: const Icon(
-                                  Icons.local_shipping,
-                                  color: Color(0xFF005C15),
-                                  size: 28,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      job.location,
-                                      style: const TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                        color: Color(0xFF2C2F30),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '${job.category} · ${job.volume}',
-                                      style: const TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 13,
-                                        color: Color(0xFF595C5D),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                              Row(
                                 children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      color: isCompleted
+                                          ? const Color(0xFF9DF197)
+                                              .withValues(alpha: 0.3)
+                                          : const Color(0xFF10EAFE)
+                                              .withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Icon(
+                                      isCompleted
+                                          ? Icons.check_circle
+                                          : Icons.local_shipping,
+                                      color: isCompleted
+                                          ? const Color(0xFF005C15)
+                                          : const Color(0xFF005159),
+                                      size: 28,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          (report['market_name'] as String?) ??
+                                              'Unknown location',
+                                          style: const TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Color(0xFF2C2F30),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Mixed Waste · ${(report['est_volume'] as String?) ?? 'Unknown'}',
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 13,
+                                            color: Color(0xFF595C5D),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 10,
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF9DF197),
+                                      color: isCompleted
+                                          ? const Color(0xFF9DF197)
+                                              .withValues(alpha: 0.5)
+                                          : const Color(0xFF10EAFE)
+                                              .withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: const Text(
-                                      'IN PROGRESS',
+                                    child: Text(
+                                      status.toUpperCase(),
                                       style: TextStyle(
                                         fontFamily: 'Inter',
                                         fontWeight: FontWeight.bold,
                                         fontSize: 10,
-                                        color: Color(0xFF005C15),
+                                        color: isCompleted
+                                            ? const Color(0xFF005C15)
+                                            : const Color(0xFF005159),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  GestureDetector(
-                                    onTap: () {
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              const Divider(color: Color(0xFFEFF1F2)),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  if (!isCompleted)
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: () {
+                                          final reportId = report['id'];
+                                          if (reportId != null) {
+                                            _markAsCompleted(
+                                                reportId.toString());
+                                          }
+                                        },
+                                        icon: const Icon(
+                                            Icons.check_circle_outline,
+                                            size: 18),
+                                        label: const Text('Mark as Completed'),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor:
+                                              const Color(0xFF176A21),
+                                          side: const BorderSide(
+                                              color: Color(0xFF176A21)),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 12),
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    Expanded(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF9DF197)
+                                              .withValues(alpha: 0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: const [
+                                            Icon(
+                                              Icons.check_circle,
+                                              color: Color(0xFF005C15),
+                                              size: 18,
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              'Completed',
+                                              style: TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                color: Color(0xFF005C15),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(width: 12),
+                                  OutlinedButton.icon(
+                                    onPressed: () {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -810,13 +1124,19 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                                         ),
                                       );
                                     },
-                                    child: const Text(
-                                      'View →',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 13,
-                                        color: Color(0xFF176A21),
+                                    icon: const Icon(Icons.visibility_outlined,
+                                        size: 18),
+                                    label: const Text('View'),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: const Color(0xFF595C5D),
+                                      side: const BorderSide(
+                                          color: Color(0xFFDADDDF)),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                        horizontal: 20,
                                       ),
                                     ),
                                   ),
@@ -827,10 +1147,8 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                         );
                       },
                     ),
-            ),
-          ],
-        );
-      },
+        ),
+      ],
     );
   }
 
