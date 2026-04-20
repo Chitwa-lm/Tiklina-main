@@ -200,6 +200,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Flutter SDK compatibility:
   - Changed SDK constraint from `^3.11.3` to `>=3.0.0 <4.0.0`
   - Allows app to run on Flutter SDK 3.0.0 and above
+- Fixed Cloudinary service compilation error:
+  - Removed `deleteFile` method (not supported in cloudinary_public package)
+  - Added `UnimplementedError` with helpful message
+  - Image deletion must be done via Cloudinary dashboard or admin API
 
 #### Security
 - Fixed credential exposure risk:
@@ -300,7 +304,8 @@ Tiklina-main/
   - No user data migration provided
 
 ### Known Issues
-- None currently
+- **Flutter Path with Spaces:** If Flutter is installed in `C:\Program Files\flutter`, some build tools may have issues with the space in the path. Workaround: Run `flutter clean` and `flutter pub get` before building.
+- **Cloudinary Image Deletion:** The `cloudinary_public` package doesn't support image deletion with unsigned uploads. Use Cloudinary dashboard for manual deletion or implement signed uploads with admin API.
 
 ### Deprecated
 - Firebase integration (completely removed)
