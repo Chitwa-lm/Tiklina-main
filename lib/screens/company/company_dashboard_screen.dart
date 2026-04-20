@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tiklini/services/database_service.dart';
+import 'package:tiklini/services/supabase_service.dart';
 import 'package:tiklini/services/auth_store.dart';
 import 'package:tiklini/screens/auth/login_screen.dart';
 import 'package:tiklini/screens/company/job_execution_screen.dart';
@@ -40,44 +41,63 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
   Future<void> _loadReports() async {
     setState(() => _isLoadingReports = true);
     try {
+      final userId = SupabaseService.instance.currentUserId;
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
+      // Get all reports for market tab (available to all collectors)
       final allReports = await DatabaseService.instance.getAllWasteReports();
 
+      // Get reports accepted by this specific collector
+      final myAcceptedReports =
+          await DatabaseService.instance.getWasteReportsByCollector(userId);
+
       setState(() {
+        // Available reports: Submitted status only (not accepted by anyone)
         _availableReports =
             allReports.where((r) => r['status'] == 'Submitted').toList();
-        _acceptedReports = allReports
+
+        // Accepted reports: Only reports accepted by this collector
+        _acceptedReports = myAcceptedReports
             .where((r) =>
-                r['status'] == 'In Progress' ||
                 r['status'] == 'Accepted' ||
+                r['status'] == 'In Progress' ||
                 r['status'] == 'Completed')
             .toList();
         _isLoadingReports = false;
       });
 
-      // Debug: Print report counts (temporarily enabled)
-      print('Total reports: ${allReports.length}');
-      print('Available reports: ${_availableReports.length}');
-      print('Accepted reports: ${_acceptedReports.length}');
-      if (_availableReports.isNotEmpty) {
-        print('First available report: ${_availableReports.first}');
-      }
+      // Reports loaded successfully
     } catch (e) {
-      print('Error loading reports: $e');
       setState(() => _isLoadingReports = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading reports: $e'),
+            backgroundColor: const Color(0xFFB02500),
+          ),
+        );
+      }
     }
   }
 
   Future<void> _acceptJob(String reportId) async {
     try {
-      await DatabaseService.instance.updateWasteReportStatus(
+      final userId = SupabaseService.instance.currentUserId;
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
+      await DatabaseService.instance.acceptWasteReportJob(
         reportId: reportId,
-        status: 'Accepted',
+        collectorId: userId,
       );
       await _loadReports();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Job accepted!'),
+            content: Text('Job accepted! Check Activity tab to manage it.'),
             backgroundColor: Color(0xFF176A21),
           ),
         );
@@ -549,26 +569,6 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  Text(
-                                    'Debug: ${_availableReports.length} reports loaded. Loading: $_isLoadingReports',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontSize: 12,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Debug: ${_availableReports.length} reports loaded',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontSize: 12,
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
                                   const Text(
                                     'When a market admin submits a waste report, it will appear here.',
                                     textAlign: TextAlign.center,
@@ -597,8 +597,6 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
                           itemCount: _availableReports.length,
                           itemBuilder: (context, i) {
                             final report = _availableReports[i];
-                            print(
-                                'Building item $i for report: ${report['market_name']}');
 
                             // Safe parsing of date
                             String date = 'Unknown date';
@@ -751,7 +749,7 @@ class _CompanyDashboardScreenState extends State<CompanyDashboardScreen> {
   }
 
   Widget _buildJobDetail(IconData icon, String label, String value) {
-    return Flexible(
+    return Expanded(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

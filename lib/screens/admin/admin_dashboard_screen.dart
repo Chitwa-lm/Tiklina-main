@@ -476,6 +476,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     final date =
                         '${reportDate.day} ${_monthName(reportDate.month)} ${reportDate.year}';
 
+                    // Get collector information if available
+                    final collector =
+                        report['collector'] as Map<String, dynamic>?;
+                    final collectorEmail = collector?['email'] as String?;
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: _buildReportCard(
@@ -486,6 +491,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         statusBgColor: statusBgColor,
                         date: date,
                         category: 'Mixed Waste',
+                        collectorEmail: collectorEmail,
                       ),
                     );
                   },
@@ -669,6 +675,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       ],
                                     ),
                                     const SizedBox(height: 2),
+                                    // Show collector info if job is accepted
+                                    if (report['collector'] != null) ...[
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.person_outline,
+                                            size: 12,
+                                            color: Color(0xFF176A21),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Collector: ${(report['collector'] as Map<String, dynamic>)['email'] ?? 'Unknown'}',
+                                            style: const TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontSize: 11,
+                                              color: Color(0xFF176A21),
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 2),
+                                    ],
                                     Text(
                                       date,
                                       style: const TextStyle(
@@ -1154,6 +1183,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     required Color statusBgColor,
     required String date,
     required String category,
+    String? collectorEmail,
     bool isUrgent = false,
   }) {
     return Container(
@@ -1245,6 +1275,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           fontFamily: 'Inter',
                           fontSize: 12,
                           color: Color(0xFF595C5D),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    // Show collector info if available
+                    if (collectorEmail != null) ...[
+                      const Icon(
+                        Icons.person_outline,
+                        size: 13,
+                        color: Color(0xFF176A21),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Collector: $collectorEmail',
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 12,
+                          color: Color(0xFF176A21),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(width: 12),

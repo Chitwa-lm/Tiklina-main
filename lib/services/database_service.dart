@@ -133,10 +133,13 @@ class DatabaseService {
 
   /// Get all waste reports (for syncing to JobStore)
   Future<List<Map<String, dynamic>>> getAllWasteReports() async {
-    final response = await _supabase
-        .from('waste_reports')
-        .select()
-        .order('reported_at', ascending: false);
+    final response = await _supabase.from('waste_reports').select('''
+          *,
+          collector:accepted_by(
+            id,
+            email
+          )
+        ''').order('reported_at', ascending: false);
 
     return List<Map<String, dynamic>>.from(response);
   }
@@ -160,6 +163,31 @@ class DatabaseService {
     await _supabase
         .from('waste_reports')
         .update({'status': status}).eq('id', reportId);
+  }
+
+  /// Accept a waste report job (assign to collector)
+  Future<void> acceptWasteReportJob({
+    required String reportId,
+    required String collectorId,
+  }) async {
+    await _supabase.from('waste_reports').update({
+      'status': 'Accepted',
+      'accepted_by': collectorId,
+      'accepted_at': DateTime.now().toIso8601String(),
+    }).eq('id', reportId);
+  }
+
+  /// Get waste reports accepted by a specific collector
+  Future<List<Map<String, dynamic>>> getWasteReportsByCollector(
+    String collectorId,
+  ) async {
+    final response = await _supabase
+        .from('waste_reports')
+        .select()
+        .eq('accepted_by', collectorId)
+        .order('accepted_at', ascending: false);
+
+    return List<Map<String, dynamic>>.from(response);
   }
 
   // ==================== COLLECTION REQUEST OPERATIONS ====================

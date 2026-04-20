@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS waste_reports (
   description TEXT NOT NULL,
   est_volume TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'Submitted' CHECK (status IN ('Submitted', 'Accepted', 'In Progress', 'Completed')),
+  accepted_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  accepted_at TIMESTAMPTZ,
   reported_at TIMESTAMPTZ DEFAULT NOW()
 );
 
