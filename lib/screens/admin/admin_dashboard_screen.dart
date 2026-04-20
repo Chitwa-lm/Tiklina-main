@@ -1275,6 +1275,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           fontSize: 15,
                           color: Color(0xFF2C2F30),
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -1300,45 +1302,63 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ],
                 ),
                 const SizedBox(height: 6),
-                Row(
+                // Wrap the info row to prevent overflow
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 4,
                   children: [
-                    if (category.isNotEmpty) ...[
-                      const Icon(
-                        Icons.category,
-                        size: 13,
-                        color: Color(0xFF595C5D),
+                    if (category.isNotEmpty)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.category,
+                            size: 13,
+                            color: Color(0xFF595C5D),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            category,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 12,
+                              color: Color(0xFF595C5D),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        category,
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12,
-                          color: Color(0xFF595C5D),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                    ],
                     // Show collector info if available
-                    if (collectorEmail != null) ...[
-                      const Icon(
-                        Icons.person_outline,
-                        size: 13,
-                        color: Color(0xFF176A21),
+                    if (collectorEmail != null)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.person_outline,
+                            size: 13,
+                            color: Color(0xFF176A21),
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              'Collector: $collectorEmail',
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 12,
+                                color: Color(0xFF176A21),
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Collector: $collectorEmail',
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12,
-                          color: Color(0xFF176A21),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                    ],
-                    if (date.isNotEmpty) ...[
+                  ],
+                ),
+                if (date.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
                       const Icon(
                         Icons.calendar_today,
                         size: 13,
@@ -1354,8 +1374,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         ),
                       ),
                     ],
-                  ],
-                ),
+                  ),
+                ],
               ],
             ),
           ),

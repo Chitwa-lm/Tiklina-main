@@ -151,22 +151,71 @@ class _VerificationScreenState extends State<VerificationScreen> {
             ),
             const SizedBox(height: 32),
 
-            // Before & After Container
-            Row(
-              children: [
-                Expanded(child: _buildPhotoCard('BEFORE', true)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildPhotoCard('AFTER', false)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Review the collection completion',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 14,
-                color: Color(0xFF595C5D),
+            // Job Details Container
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.job['market_name'] ?? 'Unknown Location',
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Color(0xFF2C2F30),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.scale_outlined,
+                          size: 16, color: Color(0xFF176A21)),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Volume: ${widget.job['est_volume'] ?? 'Unknown'}',
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14,
+                          color: Color(0xFF595C5D),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (widget.job['description'] != null &&
+                      widget.job['description'].toString().isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.description_outlined,
+                            size: 16, color: Color(0xFF176A21)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            widget.job['description'],
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 14,
+                              color: Color(0xFF595C5D),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
             ),
 
@@ -377,103 +426,6 @@ class _VerificationScreenState extends State<VerificationScreen> {
               ),
             ),
             const SizedBox(height: 32),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPhotoCard(String label, bool isBefore) {
-    return AspectRatio(
-      aspectRatio: 4 / 5,
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFEFF1F2),
-          borderRadius: BorderRadius.circular(16),
-          border: isBefore
-              ? null
-              : Border.all(
-                  color: const Color(0xFF9DF197).withValues(alpha: 0.4),
-                  width: 4,
-                ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(
-                  16 - (isBefore ? 0.0 : 4.0),
-                ),
-                child: ColorFiltered(
-                  colorFilter: isBefore
-                      ? const ColorFilter.matrix([
-                          0.2126,
-                          0.7152,
-                          0.0722,
-                          0,
-                          0,
-                          0.2126,
-                          0.7152,
-                          0.0722,
-                          0,
-                          0,
-                          0.2126,
-                          0.7152,
-                          0.0722,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          1,
-                          0,
-                        ]) // Grayscale
-                      : const ColorFilter.mode(
-                          Colors.transparent,
-                          BlendMode.multiply,
-                        ),
-                  child: Container(
-                    color: const Color(0xFFDADDDF),
-                    child: const Center(
-                      child: Icon(Icons.image, size: 48, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 12,
-              left: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: isBefore
-                      ? Colors.black.withValues(alpha: 0.4)
-                      : const Color(0xFF176A21).withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10,
-                    letterSpacing: 1.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),

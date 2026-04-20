@@ -122,7 +122,8 @@ class _JobExecutionScreenState extends State<JobExecutionScreen> {
               left: 16,
               right: 16,
               top: 16,
-              bottom: 120,
+              bottom:
+                  140, // Increased to account for bottom action bar + system nav
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,21 +346,24 @@ class _JobExecutionScreenState extends State<JobExecutionScreen> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFC698),
+                              color: _getStatusColor(
+                                  widget.job['status'] as String? ?? 'Unknown'),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: const Color(
-                                  0xFF8B4B00,
-                                ).withValues(alpha: 0.2),
+                                color: _getStatusBorderColor(
+                                    widget.job['status'] as String? ??
+                                        'Unknown'),
                               ),
                             ),
-                            child: const Text(
-                              'In Progress',
+                            child: Text(
+                              widget.job['status'] as String? ?? 'Unknown',
                               style: TextStyle(
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
-                                color: Color(0xFF6E3A00),
+                                color: _getStatusTextColor(
+                                    widget.job['status'] as String? ??
+                                        'Unknown'),
                               ),
                             ),
                           ),
@@ -485,7 +489,12 @@ class _JobExecutionScreenState extends State<JobExecutionScreen> {
             left: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 24,
+                bottom: MediaQuery.of(context).padding.bottom + 24,
+              ),
               decoration: BoxDecoration(
                 color: const Color(0xFFF5F6F7).withValues(alpha: 0.95),
                 border: Border(
@@ -496,15 +505,15 @@ class _JobExecutionScreenState extends State<JobExecutionScreen> {
               ),
               child: Container(
                 width: double.infinity,
-                height: 64,
+                height: 56,
                 decoration: BoxDecoration(
                   color: const Color(0xFF176A21),
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
                       color: const Color(0xFF176A21).withValues(alpha: 0.3),
-                      blurRadius: 32,
-                      offset: const Offset(0, 12),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
@@ -514,7 +523,7 @@ class _JobExecutionScreenState extends State<JobExecutionScreen> {
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   child: _isUploading
@@ -527,15 +536,15 @@ class _JobExecutionScreenState extends State<JobExecutionScreen> {
                             Icon(
                               Icons.check_circle_outline,
                               color: Color(0xFFD1FFC8),
-                              size: 32,
+                              size: 24,
                             ),
-                            SizedBox(width: 16),
+                            SizedBox(width: 12),
                             Text(
                               'Mark as Completed',
                               style: TextStyle(
                                 fontFamily: 'Manrope',
-                                fontWeight: FontWeight.w900,
-                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                                 color: Color(0xFFD1FFC8),
                               ),
                             ),
@@ -557,6 +566,45 @@ class _JobExecutionScreenState extends State<JobExecutionScreen> {
       return '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     } catch (e) {
       return 'Invalid date';
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return const Color(0xFF9DF197).withValues(alpha: 0.5);
+      case 'in progress':
+        return const Color(0xFFFFC698);
+      case 'accepted':
+        return const Color(0xFF10EAFE).withValues(alpha: 0.2);
+      default:
+        return const Color(0xFFEFF1F2);
+    }
+  }
+
+  Color _getStatusBorderColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return const Color(0xFF005C15).withValues(alpha: 0.2);
+      case 'in progress':
+        return const Color(0xFF8B4B00).withValues(alpha: 0.2);
+      case 'accepted':
+        return const Color(0xFF005159).withValues(alpha: 0.2);
+      default:
+        return const Color(0xFFABACAE).withValues(alpha: 0.2);
+    }
+  }
+
+  Color _getStatusTextColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return const Color(0xFF005C15);
+      case 'in progress':
+        return const Color(0xFF6E3A00);
+      case 'accepted':
+        return const Color(0xFF005159);
+      default:
+        return const Color(0xFF595C5D);
     }
   }
 
