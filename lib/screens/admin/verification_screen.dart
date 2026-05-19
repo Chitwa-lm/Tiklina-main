@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 
 class VerificationScreen extends StatefulWidget {
+  final Map<String, dynamic> job;
   final bool embedded;
-  const VerificationScreen({super.key, this.embedded = false});
+
+  const VerificationScreen({
+    super.key,
+    required this.job,
+    this.embedded = false,
+  });
 
   @override
   State<VerificationScreen> createState() => _VerificationScreenState();
@@ -11,6 +17,58 @@ class VerificationScreen extends StatefulWidget {
 class _VerificationScreenState extends State<VerificationScreen> {
   int _rating = 4;
   final _commentController = TextEditingController();
+  bool _isSubmitting = false;
+
+  Future<void> _submitVerification() async {
+    setState(() => _isSubmitting = true);
+
+    try {
+      // Here you would typically create a verification record
+      // For now, we'll just show success message
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF2C2F30),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            behavior: SnackBarBehavior.floating,
+            content: const Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Color(0xFF9DF197),
+                  size: 20,
+                ),
+                SizedBox(width: 12),
+                Text(
+                  'Verification submitted successfully',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+        Navigator.pop(
+            context, true); // Return true to indicate verification completed
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to submit verification: $e'),
+            backgroundColor: const Color(0xFFB02500),
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isSubmitting = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -25,7 +83,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
       appBar: widget.embedded
           ? null
           : AppBar(
-              backgroundColor: const Color(0xFFF5F6F7).withOpacity(0.9),
+              backgroundColor: const Color(0xFFF5F6F7).withValues(alpha: 0.9),
               elevation: 0,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Color(0xFF2C2F30)),
@@ -70,7 +128,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF9DF197).withOpacity(0.3),
+                color: const Color(0xFF9DF197).withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Row(
@@ -93,22 +151,71 @@ class _VerificationScreenState extends State<VerificationScreen> {
             ),
             const SizedBox(height: 32),
 
-            // Before & After Container
-            Row(
-              children: [
-                Expanded(child: _buildPhotoCard('BEFORE', true)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildPhotoCard('AFTER', false)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Review the collection completion',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 14,
-                color: Color(0xFF595C5D),
+            // Job Details Container
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.job['market_name'] ?? 'Unknown Location',
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Color(0xFF2C2F30),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.scale_outlined,
+                          size: 16, color: Color(0xFF176A21)),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Volume: ${widget.job['est_volume'] ?? 'Unknown'}',
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14,
+                          color: Color(0xFF595C5D),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (widget.job['description'] != null &&
+                      widget.job['description'].toString().isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.description_outlined,
+                            size: 16, color: Color(0xFF176A21)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            widget.job['description'],
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 14,
+                              color: Color(0xFF595C5D),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
             ),
 
@@ -122,7 +229,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2C2F30).withOpacity(0.04),
+                    color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
@@ -150,7 +257,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                           index < _rating ? Icons.star : Icons.star_border,
                           color: index < _rating
                               ? const Color(0xFF8B4B00)
-                              : const Color(0xFF8B4B00).withOpacity(0.3),
+                              : const Color(0xFF8B4B00).withValues(alpha: 0.3),
                         ),
                         onPressed: () {
                           setState(() {
@@ -185,7 +292,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       decoration: InputDecoration(
                         hintText: 'Tell us about the service...',
                         hintStyle: TextStyle(
-                          color: const Color(0xFFABACAE).withOpacity(0.8),
+                          color: const Color(0xFFABACAE).withValues(alpha: 0.8),
                           fontSize: 14,
                         ),
                         border: OutlineInputBorder(
@@ -205,9 +312,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF10EAFE).withOpacity(0.1),
+                color: const Color(0xFF10EAFE).withValues(alpha: 0.1),
                 border: Border.all(
-                  color: const Color(0xFF10EAFE).withOpacity(0.2),
+                  color: const Color(0xFF10EAFE).withValues(alpha: 0.2),
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -268,42 +375,14 @@ class _VerificationScreenState extends State<VerificationScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF176A21).withOpacity(0.2),
+                    color: const Color(0xFF176A21).withValues(alpha: 0.2),
                     blurRadius: 24,
                     offset: const Offset(0, 8),
                   ),
                 ],
               ),
               child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: const Color(0xFF2C2F30),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                      content: const Row(
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            color: Color(0xFF9DF197),
-                            size: 20,
-                          ),
-                          SizedBox(width: 12),
-                          Text(
-                            'Verification submitted successfully',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                  Navigator.pop(context);
-                },
+                onPressed: _isSubmitting ? null : _submitVerification,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
@@ -311,22 +390,26 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      'Submit Verification',
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                child: _isSubmitting
+                    ? const CircularProgressIndicator(
                         color: Color(0xFFD1FFC8),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text(
+                            'Submit Verification',
+                            style: TextStyle(
+                              fontFamily: 'Manrope',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Color(0xFFD1FFC8),
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Icon(Icons.send, color: Color(0xFFD1FFC8)),
+                        ],
                       ),
-                    ),
-                    SizedBox(width: 12),
-                    Icon(Icons.send, color: Color(0xFFD1FFC8)),
-                  ],
-                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -343,103 +426,6 @@ class _VerificationScreenState extends State<VerificationScreen> {
               ),
             ),
             const SizedBox(height: 32),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPhotoCard(String label, bool isBefore) {
-    return AspectRatio(
-      aspectRatio: 4 / 5,
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFEFF1F2),
-          borderRadius: BorderRadius.circular(16),
-          border: isBefore
-              ? null
-              : Border.all(
-                  color: const Color(0xFF9DF197).withOpacity(0.4),
-                  width: 4,
-                ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF2C2F30).withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(
-                  16 - (isBefore ? 0.0 : 4.0),
-                ),
-                child: ColorFiltered(
-                  colorFilter: isBefore
-                      ? const ColorFilter.matrix([
-                          0.2126,
-                          0.7152,
-                          0.0722,
-                          0,
-                          0,
-                          0.2126,
-                          0.7152,
-                          0.0722,
-                          0,
-                          0,
-                          0.2126,
-                          0.7152,
-                          0.0722,
-                          0,
-                          0,
-                          0,
-                          0,
-                          0,
-                          1,
-                          0,
-                        ]) // Grayscale
-                      : const ColorFilter.mode(
-                          Colors.transparent,
-                          BlendMode.multiply,
-                        ),
-                  child: Container(
-                    color: const Color(0xFFDADDDF),
-                    child: const Center(
-                      child: Icon(Icons.image, size: 48, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 12,
-              left: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: isBefore
-                      ? Colors.black.withOpacity(0.4)
-                      : const Color(0xFF176A21).withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10,
-                    letterSpacing: 1.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),

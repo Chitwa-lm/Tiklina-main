@@ -1,15 +1,99 @@
 import 'package:flutter/material.dart';
-import 'package:tiklini/screens/admin/verification_screen.dart'; // Just for demo
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:tiklini/services/database_service.dart';
 
-class JobExecutionScreen extends StatelessWidget {
-  const JobExecutionScreen({super.key});
+class JobExecutionScreen extends StatefulWidget {
+  final Map<String, dynamic> job;
+
+  const JobExecutionScreen({
+    super.key,
+    required this.job,
+  });
+
+  @override
+  State<JobExecutionScreen> createState() => _JobExecutionScreenState();
+}
+
+class _JobExecutionScreenState extends State<JobExecutionScreen> {
+  File? _proofImage;
+  bool _isUploading = false;
+
+  Future<void> _takeProofPhoto() async {
+    try {
+      final picker = ImagePicker();
+      final image = await picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+        maxWidth: 1200,
+      );
+
+      if (image != null) {
+        setState(() {
+          _proofImage = File(image.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to take photo: $e'),
+            backgroundColor: const Color(0xFFB02500),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _markJobCompleted() async {
+    if (_proofImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please take a proof photo before completing the job'),
+          backgroundColor: Color(0xFFB02500),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isUploading = true);
+
+    try {
+      // Update job status to completed
+      await DatabaseService.instance.updateWasteReportStatus(
+        reportId: widget.job['id'].toString(),
+        status: 'Completed',
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Job marked as completed!'),
+            backgroundColor: Color(0xFF176A21),
+          ),
+        );
+        Navigator.pop(context, true); // Return true to indicate completion
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to complete job: $e'),
+            backgroundColor: const Color(0xFFB02500),
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isUploading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6F7),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F6F7).withOpacity(0.9),
+        backgroundColor: const Color(0xFFF5F6F7).withValues(alpha: 0.9),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF176A21)),
@@ -38,7 +122,8 @@ class JobExecutionScreen extends StatelessWidget {
               left: 16,
               right: 16,
               top: 16,
-              bottom: 120,
+              bottom:
+                  140, // Increased to account for bottom action bar + system nav
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,7 +136,7 @@ class JobExecutionScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2C2F30).withOpacity(0.04),
+                        color: const Color(0xFF2C2F30).withValues(alpha: 0.04),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
@@ -71,9 +156,10 @@ class JobExecutionScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Green Valley Marketplace',
-                        style: TextStyle(
+                      Text(
+                        widget.job['market_name'] as String? ??
+                            'Unknown Location',
+                        style: const TextStyle(
                           fontFamily: 'Manrope',
                           fontWeight: FontWeight.w800,
                           fontSize: 24,
@@ -83,17 +169,18 @@ class JobExecutionScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Icon(
+                        children: [
+                          const Icon(
                             Icons.location_on,
                             size: 18,
                             color: Color(0xFF595C5D),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              '142 Industrial Way, West Sector, Block C',
-                              style: TextStyle(
+                              widget.job['description'] as String? ??
+                                  'No description available',
+                              style: const TextStyle(
                                 fontFamily: 'Inter',
                                 fontSize: 16,
                                 color: Color(0xFF595C5D),
@@ -142,7 +229,9 @@ class JobExecutionScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       blurRadius: 12,
                                     ),
                                   ],
@@ -189,7 +278,9 @@ class JobExecutionScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF176A21).withOpacity(0.2),
+                              color: const Color(
+                                0xFF176A21,
+                              ).withValues(alpha: 0.2),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -255,19 +346,24 @@ class JobExecutionScreen extends StatelessWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFC698),
+                              color: _getStatusColor(
+                                  widget.job['status'] as String? ?? 'Unknown'),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: const Color(0xFF8B4B00).withOpacity(0.2),
+                                color: _getStatusBorderColor(
+                                    widget.job['status'] as String? ??
+                                        'Unknown'),
                               ),
                             ),
-                            child: const Text(
-                              'In Progress',
+                            child: Text(
+                              widget.job['status'] as String? ?? 'Unknown',
                               style: TextStyle(
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
-                                color: Color(0xFF6E3A00),
+                                color: _getStatusTextColor(
+                                    widget.job['status'] as String? ??
+                                        'Unknown'),
                               ),
                             ),
                           ),
@@ -277,13 +373,13 @@ class JobExecutionScreen extends StatelessWidget {
                       _buildStatusItem(
                         Icons.inventory_2,
                         'Estimated Load',
-                        '450kg Organic Waste',
+                        '${widget.job['est_volume'] as String? ?? 'Unknown'} Mixed Waste',
                       ),
                       const SizedBox(height: 12),
                       _buildStatusItem(
                         Icons.schedule,
-                        'Time Window',
-                        '08:00 AM - 10:30 AM',
+                        'Reported',
+                        _formatDate(widget.job['reported_at'] as String?),
                       ),
                     ],
                   ),
@@ -309,60 +405,80 @@ class JobExecutionScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 250,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF1F2).withOpacity(0.5),
+                    color: _proofImage != null
+                        ? Colors.transparent
+                        : const Color(0xFFEFF1F2).withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(32),
                     border: Border.all(
-                      color: const Color(0xFFABACAE).withOpacity(0.5),
+                      color: const Color(0xFFABACAE).withValues(alpha: 0.5),
                       width: 4,
-                      // Note: dashed border simulation omitted, solid border used for simplicity
                     ),
                   ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(32),
-                      onTap: () {},
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.add_a_photo,
-                              size: 36,
-                              color: Color(0xFF025D16),
+                  child: _proofImage != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(28),
+                          child: Image.file(
+                            _proofImage!,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(32),
+                            onTap: _takeProofPhoto,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.add_a_photo,
+                                    size: 36,
+                                    color: Color(0xFF025D16),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Upload Proof of Collection',
+                                  style: TextStyle(
+                                    fontFamily: 'Manrope',
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 18,
+                                    color: Color(0xFF2C2F30),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                const Text(
+                                  '(Take Photo of Bins)',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16,
+                                    color: Color(0xFF595C5D),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Upload Proof of Collection',
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 18,
-                              color: Color(0xFF2C2F30),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            '(Take Photo of Bins)',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                              color: Color(0xFF595C5D),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                        ),
                 ),
+                if (_proofImage != null) ...[
+                  const SizedBox(height: 16),
+                  TextButton.icon(
+                    onPressed: _takeProofPhoto,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retake Photo'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color(0xFF176A21),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -373,66 +489,67 @@ class JobExecutionScreen extends StatelessWidget {
             left: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 24,
+                bottom: MediaQuery.of(context).padding.bottom + 24,
+              ),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F6F7).withOpacity(0.95),
+                color: const Color(0xFFF5F6F7).withValues(alpha: 0.95),
                 border: Border(
                   top: BorderSide(
-                    color: const Color(0xFFABACAE).withOpacity(0.1),
+                    color: const Color(0xFFABACAE).withValues(alpha: 0.1),
                   ),
                 ),
               ),
               child: Container(
                 width: double.infinity,
-                height: 64,
+                height: 56,
                 decoration: BoxDecoration(
                   color: const Color(0xFF176A21),
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF176A21).withOpacity(0.3),
-                      blurRadius: 32,
-                      offset: const Offset(0, 12),
+                      color: const Color(0xFF176A21).withValues(alpha: 0.3),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Demo navigation to Verification rating screen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => VerificationScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: _isUploading ? null : _markJobCompleted,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(
-                        Icons.check_circle_outline,
-                        color: Color(0xFFD1FFC8),
-                        size: 32,
-                      ),
-                      SizedBox(width: 16),
-                      Text(
-                        'Mark as Completed',
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontWeight: FontWeight.w900,
-                          fontSize: 20,
+                  child: _isUploading
+                      ? const CircularProgressIndicator(
                           color: Color(0xFFD1FFC8),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(
+                              Icons.check_circle_outline,
+                              color: Color(0xFFD1FFC8),
+                              size: 24,
+                            ),
+                            SizedBox(width: 12),
+                            Text(
+                              'Mark as Completed',
+                              style: TextStyle(
+                                fontFamily: 'Manrope',
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Color(0xFFD1FFC8),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ),
@@ -440,6 +557,55 @@ class JobExecutionScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatDate(String? dateString) {
+    if (dateString == null) return 'Unknown date';
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return 'Invalid date';
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return const Color(0xFF9DF197).withValues(alpha: 0.5);
+      case 'in progress':
+        return const Color(0xFFFFC698);
+      case 'accepted':
+        return const Color(0xFF10EAFE).withValues(alpha: 0.2);
+      default:
+        return const Color(0xFFEFF1F2);
+    }
+  }
+
+  Color _getStatusBorderColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return const Color(0xFF005C15).withValues(alpha: 0.2);
+      case 'in progress':
+        return const Color(0xFF8B4B00).withValues(alpha: 0.2);
+      case 'accepted':
+        return const Color(0xFF005159).withValues(alpha: 0.2);
+      default:
+        return const Color(0xFFABACAE).withValues(alpha: 0.2);
+    }
+  }
+
+  Color _getStatusTextColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return const Color(0xFF005C15);
+      case 'in progress':
+        return const Color(0xFF6E3A00);
+      case 'accepted':
+        return const Color(0xFF005159);
+      default:
+        return const Color(0xFF595C5D);
+    }
   }
 
   Widget _buildStatusItem(IconData icon, String title, String value) {
@@ -455,7 +621,7 @@ class JobExecutionScreen extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF176A21).withOpacity(0.1),
+              color: const Color(0xFF176A21).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: const Color(0xFF176A21)),

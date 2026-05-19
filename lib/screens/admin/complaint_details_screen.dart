@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'verification_screen.dart';
 
 class ComplaintDetailsScreen extends StatelessWidget {
   const ComplaintDetailsScreen({super.key});
@@ -88,7 +87,7 @@ class ComplaintDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Photo placeholders
             const Text(
               'Evidence Photos',
@@ -129,32 +128,26 @@ class ComplaintDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            
+
             SizedBox(
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const VerificationScreen(),
-                    ),
-                  );
-                },
+                onPressed:
+                    null, // Disabled since no real complaint data is available
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF176A21),
+                  backgroundColor: const Color(0xFFABACAE),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
                 child: const Text(
-                  'Verify & Rate Collection',
+                  'No Complaint Data Available',
                   style: TextStyle(
                     fontFamily: 'Manrope',
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: Color(0xFFD1FFC8),
+                    color: Colors.white,
                   ),
                 ),
               ),

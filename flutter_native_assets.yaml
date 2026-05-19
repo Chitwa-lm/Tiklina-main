@@ -1,0 +1,4 @@
+# Disable native assets build to avoid path issues
+# This is a temporary workaround for the Flutter path with spaces issue
+native_assets:
+  enabled: false

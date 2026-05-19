@@ -1,4 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'supabase_service.dart';
 
 class DatabaseService {
@@ -37,11 +36,8 @@ class DatabaseService {
       'updated_at': DateTime.now().toIso8601String(),
     };
 
-    final response = await _supabase
-        .from('profiles')
-        .upsert(profileData)
-        .select()
-        .single();
+    final response =
+        await _supabase.from('profiles').upsert(profileData).select().single();
 
     return response;
   }
@@ -107,19 +103,25 @@ class DatabaseService {
     required double locationLat,
     required double locationLng,
   }) async {
-    final evidenceList = photoUrls.map((url) => {
-      'report_id': reportId,
-      'photo_url': url,
-      'location_lat': locationLat,
-      'location_lng': locationLng,
-      'timestamp': DateTime.now().toIso8601String(),
-    }).toList();
+    final evidenceList = photoUrls
+        .map(
+          (url) => {
+            'report_id': reportId,
+            'photo_url': url,
+            'location_lat': locationLat,
+            'location_lng': locationLng,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        )
+        .toList();
 
     await _supabase.from('report_evidence').insert(evidenceList);
   }
 
   /// Get all waste reports for a specific user
-  Future<List<Map<String, dynamic>>> getWasteReportsByUser(String userId) async {
+  Future<List<Map<String, dynamic>>> getWasteReportsByUser(
+    String userId,
+  ) async {
     final response = await _supabase
         .from('waste_reports')
         .select('*, report_evidence(*)')
@@ -127,6 +129,37 @@ class DatabaseService {
         .order('reported_at', ascending: false);
 
     return List<Map<String, dynamic>>.from(response);
+  }
+
+  /// Get all waste reports
+  Future<List<Map<String, dynamic>>> getAllWasteReports() async {
+    final response = await _supabase
+        .from('waste_reports')
+        .select()
+        .order('reported_at', ascending: false);
+
+    final reports = List<Map<String, dynamic>>.from(response);
+
+    // For each report with accepted_by, get collector info from profiles
+    for (final report in reports) {
+      if (report['accepted_by'] != null) {
+        try {
+          final collectorProfile = await _supabase
+              .from('profiles')
+              .select('email')
+              .eq('user_id', report['accepted_by'])
+              .maybeSingle();
+
+          if (collectorProfile != null) {
+            report['collector'] = collectorProfile;
+          }
+        } catch (e) {
+          // If we can't get collector info, just continue
+        }
+      }
+    }
+
+    return reports;
   }
 
   /// Get a single waste report with evidence
@@ -147,8 +180,32 @@ class DatabaseService {
   }) async {
     await _supabase
         .from('waste_reports')
-        .update({'status': status})
-        .eq('id', reportId);
+        .update({'status': status}).eq('id', reportId);
+  }
+
+  /// Accept a waste report job (assign to collector)
+  Future<void> acceptWasteReportJob({
+    required String reportId,
+    required String collectorId,
+  }) async {
+    await _supabase.from('waste_reports').update({
+      'status': 'Accepted',
+      'accepted_by': collectorId,
+      'accepted_at': DateTime.now().toIso8601String(),
+    }).eq('id', reportId);
+  }
+
+  /// Get waste reports accepted by a specific collector
+  Future<List<Map<String, dynamic>>> getWasteReportsByCollector(
+    String collectorId,
+  ) async {
+    final response = await _supabase
+        .from('waste_reports')
+        .select()
+        .eq('accepted_by', collectorId)
+        .order('accepted_at', ascending: false);
+
+    return List<Map<String, dynamic>>.from(response);
   }
 
   // ==================== COLLECTION REQUEST OPERATIONS ====================
@@ -174,17 +231,13 @@ class DatabaseService {
 
   /// Get all pending collection requests (for waste collectors)
   Future<List<Map<String, dynamic>>> getPendingCollectionRequests() async {
-    final response = await _supabase
-        .from('collection_requests')
-        .select('''
+    final response = await _supabase.from('collection_requests').select('''
           *,
           waste_reports!inner(
             *,
             report_evidence(*)
           )
-        ''')
-        .eq('status', 'Pending')
-        .order('requested_at', ascending: false);
+        ''').eq('status', 'Pending').order('requested_at', ascending: false);
 
     return List<Map<String, dynamic>>.from(response);
   }
@@ -196,8 +249,7 @@ class DatabaseService {
   }) async {
     await _supabase
         .from('collection_requests')
-        .update({'status': status})
-        .eq('id', requestId);
+        .update({'status': status}).eq('id', requestId);
   }
 
   // ==================== JOB ASSIGNMENT OPERATIONS ====================
@@ -232,9 +284,7 @@ class DatabaseService {
 
   /// Get jobs for a specific company
   Future<List<Map<String, dynamic>>> getJobsByCompany(String companyId) async {
-    final response = await _supabase
-        .from('job_assignments')
-        .select('''
+    final response = await _supabase.from('job_assignments').select('''
           *,
           collection_requests!inner(
             *,
@@ -243,9 +293,7 @@ class DatabaseService {
               report_evidence(*)
             )
           )
-        ''')
-        .eq('company_id', companyId)
-        .order('accepted_at', ascending: false);
+        ''').eq('company_id', companyId).order('accepted_at', ascending: false);
 
     return List<Map<String, dynamic>>.from(response);
   }
@@ -274,13 +322,10 @@ class DatabaseService {
   }
 
   /// Confirm collection by admin
-  Future<void> confirmCollection({
-    required String verificationId,
-  }) async {
+  Future<void> confirmCollection({required String verificationId}) async {
     await _supabase
         .from('collection_verifications')
-        .update({'admin_confirmed': true})
-        .eq('id', verificationId);
+        .update({'admin_confirmed': true}).eq('id', verificationId);
   }
 
   // ==================== REVIEW OPERATIONS ====================
@@ -302,17 +347,16 @@ class DatabaseService {
       'created_at': DateTime.now().toIso8601String(),
     };
 
-    final response = await _supabase
-        .from('reviews')
-        .insert(reviewData)
-        .select()
-        .single();
+    final response =
+        await _supabase.from('reviews').insert(reviewData).select().single();
 
     return response;
   }
 
   /// Get reviews for a company
-  Future<List<Map<String, dynamic>>> getReviewsByCompany(String companyId) async {
+  Future<List<Map<String, dynamic>>> getReviewsByCompany(
+    String companyId,
+  ) async {
     final response = await _supabase
         .from('reviews')
         .select('*')
@@ -325,14 +369,14 @@ class DatabaseService {
   /// Get average rating for a company
   Future<double> getCompanyAverageRating(String companyId) async {
     final reviews = await getReviewsByCompany(companyId);
-    
+
     if (reviews.isEmpty) return 0.0;
-    
+
     final totalRating = reviews.fold<int>(
       0,
       (sum, review) => sum + (review['rating'] as int),
     );
-    
+
     return totalRating / reviews.length;
   }
 }
